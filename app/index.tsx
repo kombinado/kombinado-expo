@@ -1,7 +1,9 @@
+import { Image } from "expo-image";
+import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -9,84 +11,100 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const [isDriver, setIsDriver] = useState(false);
   return (
-    <SafeAreaView className="flex-1 bg-[#000804]">
-      {/* Impede que o teclado cubra os inputs */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 justify-center px-8"
-      >
-        {/* Cabeçalho Lúdico */}
-        <View className="items-center mb-12">
-          <Text className="text-4xl uppercase font-extrabold text-[#6BFE9C]">
-            Kombinado
-          </Text>
-        </View>
-
-        {/* Formulário Acessível */}
-        <View className="bg-[#152219] rounded-[12px] py-[50px] px-[20px] gap-y-5">
-          <View>
-            <Text className="text-[24px] font-bold text-[#C9FDDE] ">
-              Crie sua conta
-            </Text>
-            <Text className="text-[14px] text-[#84B69A] ">
-              Junte-se à comunidade universitária de caronas.
-            </Text>
-          </View>
-
-          <View>
-            <Text className="text-slate-700 font-extrabold mb-2 ml-1 uppercase text-sm tracking-wider">
-              E-mail Institucional
-            </Text>
-            <TextInput
-              className="w-full bg-white px-5 py-4 rounded-2xl border-2 border-slate-200 focus:border-sky-500 text-lg text-slate-800"
-              placeholder="aluno@iftm.edu.br"
-              placeholderTextColor="#94a3b8"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              // value={}
-              // onChangeText={}
-              // Propriedades de Acessibilidade
-              accessible={true}
-              accessibilityLabel="Campo de e-mail institucional"
-              accessibilityHint="Digite seu e-mail do IFTM para acessar o aplicativo"
+    <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+      <SafeAreaView className="flex p-50 bg-[#E84855]">
+        <KeyboardAvoidingView
+          behavior="padding"
+          className="justify-center px-8 gap-y-12"
+        >
+          <View className="items-center">
+            <Image
+              source={require("../assets/images/kombi-auth-vector-image.svg")}
+              style={{ width: 200, height: 100 }}
+              contentFit="contain"
             />
           </View>
 
-          <View>
-            <Text className="text-slate-700 font-extrabold mb-2 ml-1 uppercase text-sm tracking-wider">
-              Senha
-            </Text>
-            <TextInput
-              className="w-full bg-white px-5 py-4 rounded-2xl border-2 border-slate-200 focus:border-sky-500 text-lg text-slate-800"
-              placeholder="••••••••"
-              placeholderTextColor="#94a3b8"
-              secureTextEntry
-              // value={}
-              // onChangeText={}
-              // Propriedades de Acessibilidade
+          {/* Formulário Acessível */}
+          <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8">
+            <View className="gap-4">
+              <Text className="text-3xl text-wrap font-bold text-[#040F0F] ">
+                Participe agora do Kombinado
+              </Text>
+              <Text className="text-lg text-wrap text-[#040F0F] ">
+                Tenha acesso à maior comunidade universitária de caronas.
+              </Text>
+            </View>
+
+            <View className="flex-col gap-y-5">
+              <TextInput
+                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                placeholder="Nome Completo"
+                placeholderTextColor="#FAF9F9"
+                keyboardType="name-phone-pad"
+                autoCapitalize="words"
+                accessible={true}
+                accessibilityLabel="Campo de Nome Completo"
+                accessibilityHint="Digite seu Nome Completo para acessar o aplicativo"
+              />
+              <TextInput
+                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                placeholder="Email"
+                placeholderTextColor="#FAF9F9"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                accessible={true}
+                accessibilityLabel="Campo de e-mail institucional"
+                accessibilityHint="Digite seu e-mail do IFTM para acessar o aplicativo"
+              />
+
+              <TextInput
+                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                placeholder="WhatsApp"
+                placeholderTextColor="#FAF9F9"
+                keyboardType="phone-pad"
+                autoCapitalize="none"
+                accessible={true}
+                accessibilityLabel="Campo de contato WhatsApp"
+                accessibilityHint="Digite seu contato do WhatsApp para acessar o aplicativo"
+              />
+
+              <TextInput
+                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                placeholder="Curso"
+                placeholderTextColor="#FAF9F9"
+                keyboardType="default"
+                autoCapitalize="none"
+                accessible={true}
+                accessibilityLabel="Campo de Curso do IFTM"
+                accessibilityHint="Digite seu Curso no IFTM para acessar o aplicativo"
+              />
+            </View>
+
+            {/* Botão Principal Gamificado */}
+            <Pressable
+              className="mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95"
+              onPress={() => console.log("Partiu IFTM!")}
+              // Acessibilidade do Botão
               accessible={true}
-              accessibilityLabel="Campo de senha"
-              accessibilityHint="Digite sua senha de acesso"
-            />
+              accessibilityRole="button"
+              accessibilityLabel="Botão Entrar"
+              accessibilityHint="Toque para fazer login e buscar caronas"
+            >
+              <Text className="text-white text-xl font-extrabold tracking-widest">
+                Cadastrar
+              </Text>
+            </Pressable>
           </View>
 
-          {/* Botão Principal Gamificado */}
-          <Pressable
-            className="mt-4 w-full bg-sky-500 py-5 rounded-2xl items-center shadow-md active:bg-sky-700 active:scale-95"
-            // onPress={() => console.log("Partiu IFTM!", email)}
-            // Acessibilidade do Botão
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Botão Entrar"
-            accessibilityHint="Toque para fazer login e buscar caronas"
-          >
-            <Text className="text-white text-xl font-extrabold uppercase tracking-widest">
-              Dar Partida
-            </Text>
-          </Pressable>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <View className="flex-row self-center">
+            <Text className="mr-1  text-[#FAF9F9]">Já possui uma conta?</Text>
+            <Text className="text-[#FAF9F9] font-bold">Entrar</Text>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ScrollView>
   );
 }
