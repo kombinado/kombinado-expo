@@ -1,9 +1,9 @@
+import { ScreenWrapper } from "@/components/ScreenWraper";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
@@ -12,9 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const [isDriver, setIsDriver] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   return (
-    <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
-      <SafeAreaView className="flex p-50 bg-[#E84855]">
+    <ScreenWrapper>
+      <SafeAreaView className="flex-1 bg-[#E84855]">
         <KeyboardAvoidingView
           behavior="padding"
           className="justify-center px-8 gap-y-12"
@@ -31,24 +32,15 @@ export default function Index() {
           <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8">
             <View className="gap-4">
               <Text className="text-3xl text-wrap font-bold text-[#040F0F] ">
-                Participe agora do Kombinado
+                Bem-vindo à comunidade
               </Text>
               <Text className="text-lg text-wrap text-[#040F0F] ">
-                Tenha acesso à maior comunidade universitária de caronas.
+                Acesse sua conta institucional para a encontrar caronas e
+                colegas.
               </Text>
             </View>
 
             <View className="flex-col gap-y-5">
-              <TextInput
-                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
-                placeholder="Nome Completo"
-                placeholderTextColor="#FAF9F9"
-                keyboardType="name-phone-pad"
-                autoCapitalize="words"
-                accessible={true}
-                accessibilityLabel="Campo de Nome Completo"
-                accessibilityHint="Digite seu Nome Completo para acessar o aplicativo"
-              />
               <TextInput
                 className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
                 placeholder="Email"
@@ -58,6 +50,18 @@ export default function Index() {
                 accessible={true}
                 accessibilityLabel="Campo de e-mail institucional"
                 accessibilityHint="Digite seu e-mail do IFTM para acessar o aplicativo"
+              />
+
+              <TextInput
+                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                placeholder="Senha"
+                placeholderTextColor="#FAF9F9"
+                keyboardType="default"
+                secureTextEntry={true}
+                autoCapitalize="words"
+                accessible={true}
+                accessibilityLabel="Campo de Nome Completo"
+                accessibilityHint="Digite seu Nome Completo para acessar o aplicativo"
               />
             </View>
 
@@ -83,6 +87,6 @@ export default function Index() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScrollView>
+    </ScreenWrapper>
   );
 }
