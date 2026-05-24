@@ -1,5 +1,6 @@
 import { ScreenWrapper } from "@/components/ScreenWraper";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -11,7 +12,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-  const [isDriver, setIsDriver] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   return (
     <ScreenWrapper>
@@ -76,14 +76,18 @@ export default function Index() {
               accessibilityHint="Toque para fazer login e buscar caronas"
             >
               <Text className="text-white text-xl font-extrabold tracking-widest">
-                Cadastrar
+                Entrar
               </Text>
             </Pressable>
           </View>
 
           <View className="flex-row self-center">
-            <Text className="mr-1  text-[#FAF9F9]">Já possui uma conta?</Text>
-            <Text className="text-[#FAF9F9] font-bold">Entrar</Text>
+            <Text className="mr-1  text-[#FAF9F9]">
+              Ainda não possui uma conta?
+            </Text>
+            <Pressable onPress={() => router.push("/signup")}>
+              <Text className="text-[#FAF9F9] font-bold">Cadastrar</Text>
+            </Pressable>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
