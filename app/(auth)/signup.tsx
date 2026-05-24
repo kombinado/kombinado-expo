@@ -1,10 +1,10 @@
+import { ScreenWrapper } from "@/components/ScreenWraper";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
   const [isDriver, setIsDriver] = useState(false);
   return (
-    <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+    <ScreenWrapper>
       <SafeAreaView className="flex p-50 bg-[#E84855]">
         <KeyboardAvoidingView
           behavior="padding"
@@ -162,12 +162,12 @@ export default function Index() {
 
           <View className="flex-row self-center">
             <Text className="mr-1  text-[#FAF9F9]">Já possui uma conta?</Text>
-            <Pressable onPress={() => router.push("/signup")}>
+            <Pressable onPress={() => router.push("/login")}>
               <Text className="text-[#FAF9F9] font-bold">Entrar</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScrollView>
+    </ScreenWrapper>
   );
 }
