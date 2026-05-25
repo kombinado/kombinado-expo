@@ -1,50 +1,63 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
+import { House, User } from "lucide-react-native";
 import { Pressable, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth/AuthProvider";
 
 export default function AppLayout() {
   const { signOut } = useAuth();
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <Stack
+    <Tabs
       screenOptions={{
-        headerShown: true, // EXIBE o Stack nas pastas privadas
-        headerStyle: {
-          backgroundColor: "#000000", // Fundo preto combinando com seu Toggle Button
+        headerShown: false,
+
+        tabBarLabelVisibilityMode: "unlabeled",
+        tabBarStyle: {
+          backgroundColor: "#E84855",
+          borderTopWidth: 0,
+
+          height: 60 + insets.bottom,
+
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
+
+          paddingTop: 10,
         },
-        headerTintColor: "#ffffff", // Cor do título e botões de voltar
-        headerTitleStyle: {
-          fontWeight: "900", // Fonte bem grossa e energética
-          fontSize: 20,
+        tabBarActiveTintColor: "#0ea5e9",
+        tabBarInactiveTintColor: "#64748b",
+        tabBarLabelStyle: {
+          fontWeight: "900",
+          fontSize: 12,
         },
-        headerShadowVisible: false, // Remove aquela linha feia abaixo do header
       }}
     >
-      {/* Tela Home com configurações específicas */}
-      <Stack.Screen
+      <Tabs.Screen
         name="home"
         options={{
           title: "Kombinado 🚌",
-          // Exemplo: Adicionar um botão de Logout lúdico no canto direito do Header
+          tabBarLabel: "Caronas",
+          tabBarIcon: ({ color, size }) => <House stroke="#fff" />,
           headerRight: () => (
             <Pressable
               onPress={signOut}
-              className="bg-red-500 px-3 py-1.5 rounded-full active:scale-95"
+              className="bg-red-500 px-4 py-2 rounded-full active:scale-95 mr-4"
             >
-              <Text className="text-white font-extrabold text-xs">Sair</Text>
+              <Text className="text-white font-extrabold text-xs">SAIR</Text>
             </Pressable>
           ),
         }}
       />
 
-      {/* Tela de Perfil */}
-      <Stack.Screen
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Meu Perfil",
-          animation: "slide_from_bottom", // Transição diferenciada para o perfil
+          tabBarLabel: "Perfil",
+          tabBarIcon: ({ color, size }) => <User stroke="#fff" />,
         }}
       />
-    </Stack>
+    </Tabs>
   );
 }
