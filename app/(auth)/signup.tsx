@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
+export default function SignUp() {
   const [isDriver, setIsDriver] = useState(false);
   return (
     <ScreenWrapper>

@@ -1,4 +1,5 @@
 import { ScreenWrapper } from "@/components/ScreenWraper";
+import { useAuth } from "@/context/auth/AuthProvider";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -11,8 +12,24 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { signIn } = useAuth();
+
+  const handleLogin = () => {
+    // Uma validação simples só para simular um formulário real
+    if (!email || !password) {
+      alert("Por favor, preencha e-mail e senha!");
+      return;
+    }
+
+    // 3. Executa a função fake!
+    // Isso vai mudar o userToken para "token_fake" no AuthProvider
+    signIn(email, password);
+  };
+
   return (
     <ScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
@@ -42,8 +59,10 @@ export default function Index() {
 
             <View className="flex-col gap-y-5">
               <TextInput
-                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
                 placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
                 placeholderTextColor="#FAF9F9"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -53,8 +72,10 @@ export default function Index() {
               />
 
               <TextInput
-                className="w-full bg-[#E84855] font-semibold text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
                 placeholder="Senha"
+                value={password}
+                onChangeText={setPassword}
                 placeholderTextColor="#FAF9F9"
                 keyboardType="default"
                 secureTextEntry={true}
@@ -68,7 +89,7 @@ export default function Index() {
             {/* Botão Principal Gamificado */}
             <Pressable
               className="mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95"
-              onPress={() => console.log("Partiu IFTM!")}
+              onPress={handleLogin}
               // Acessibilidade do Botão
               accessible={true}
               accessibilityRole="button"
@@ -86,7 +107,7 @@ export default function Index() {
               Ainda não possui uma conta?
             </Text>
             <Pressable onPress={() => router.push("/signup")}>
-              <Text className="text-[#FAF9F9] font-bold">Cadastrar</Text>
+              <Text className="text-[#FAF9F9] font-bold">Criar Conta</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
