@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { House, User } from "lucide-react-native";
-import { Pressable, Text } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth/AuthProvider";
 
@@ -14,7 +14,6 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
 
-        tabBarLabelVisibilityMode: "unlabeled",
         tabBarStyle: {
           backgroundColor: "#E84855",
           borderTopWidth: 0,
@@ -25,8 +24,8 @@ export default function AppLayout() {
 
           paddingTop: 10,
         },
-        tabBarActiveTintColor: "#0ea5e9",
-        tabBarInactiveTintColor: "#64748b",
+        tabBarActiveTintColor: "#E84855",
+        tabBarInactiveTintColor: "#e5e5e5",
         tabBarLabelStyle: {
           fontWeight: "900",
           fontSize: 12,
@@ -37,15 +36,17 @@ export default function AppLayout() {
         name="home"
         options={{
           title: "Kombinado 🚌",
-          tabBarLabel: "Caronas",
-          tabBarIcon: ({ color, size }) => <House stroke="#fff" />,
-          headerRight: () => (
-            <Pressable
-              onPress={signOut}
-              className="bg-red-500 px-4 py-2 rounded-full active:scale-95 mr-4"
+          tabBarLabel: "",
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              className={`p-2 rounded-full transition-all ${
+                focused
+                  ? "bg-white" // Efeito quando está clicado
+                  : "" // Sem efeito quando está inativo
+              }`}
             >
-              <Text className="text-white font-extrabold text-xs">SAIR</Text>
-            </Pressable>
+              <House stroke={color} size={size} />
+            </View>
           ),
         }}
       />
@@ -54,8 +55,18 @@ export default function AppLayout() {
         name="profile"
         options={{
           title: "Meu Perfil",
-          tabBarLabel: "Perfil",
-          tabBarIcon: ({ color, size }) => <User stroke="#fff" />,
+          tabBarLabel: "",
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              className={`p-2 rounded-full transition-all ${
+                focused
+                  ? "bg-white" // Efeito quando está clicado
+                  : "" // Sem efeito quando está inativo
+              }`}
+            >
+              <User stroke={color} size={size} />
+            </View>
+          ),
         }}
       />
     </Tabs>
