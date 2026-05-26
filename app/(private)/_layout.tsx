@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import { House, User } from "lucide-react-native";
 import { Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth/AuthProvider";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function AppLayout() {
   const { signOut } = useAuth();
