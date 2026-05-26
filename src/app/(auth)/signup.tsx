@@ -1,4 +1,4 @@
-import { ScreenWrapper } from "@/components/ScreenWraper";
+import { ScreenWrapper } from "@/src/components/ScreenWraper";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -22,7 +22,7 @@ export default function SignUp() {
         >
           <View className="items-center">
             <Image
-              source={require("../../assets/images/kombi-auth-vector-image.svg")}
+              source={require("../../../assets/images/kombi-auth-vector-image.svg")}
               style={{ width: 200, height: 100 }}
               contentFit="contain"
             />

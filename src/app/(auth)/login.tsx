@@ -1,5 +1,5 @@
-import { ScreenWrapper } from "@/components/ScreenWraper";
-import { useAuth } from "@/context/auth/AuthProvider";
+import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { useAuth } from "@/src/context/auth/AuthProvider";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -39,7 +39,7 @@ export default function Login() {
         >
           <View className="items-center">
             <Image
-              source={require("../../assets/images/kombi-auth-vector-image.svg")}
+              source={require("../../../assets/images/kombi-auth-vector-image.svg")}
               style={{ width: 200, height: 100 }}
               contentFit="contain"
             />
