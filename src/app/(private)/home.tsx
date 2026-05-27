@@ -1,4 +1,4 @@
-import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
 import { Text } from "react-native";
 
 export default function Home() {

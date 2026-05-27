@@ -1,4 +1,4 @@
-import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function SignUp() {
   const [isDriver, setIsDriver] = useState(false);
   return (
-    <ScreenWrapper>
+    <AuthScreenWrapper>
       <SafeAreaView className="flex p-50 bg-[#E84855]">
         <KeyboardAvoidingView
           behavior="padding"
@@ -168,6 +168,6 @@ export default function SignUp() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScreenWrapper>
+    </AuthScreenWrapper>
   );
 }

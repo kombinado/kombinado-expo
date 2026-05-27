@@ -1,3 +1,4 @@
+import { Header } from "@/src/components/Header";
 import { Tabs } from "expo-router";
 import { House, User } from "lucide-react-native";
 import { View } from "react-native";
@@ -12,7 +13,7 @@ export default function AppLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        header: () => <Header />,
 
         tabBarStyle: {
           backgroundColor: "#E84855",

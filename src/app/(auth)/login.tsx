@@ -1,4 +1,4 @@
-import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { useAuth } from "@/src/context/auth/AuthProvider";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -31,7 +31,7 @@ export default function Login() {
   };
 
   return (
-    <ScreenWrapper>
+    <AuthScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
         <KeyboardAvoidingView
           behavior="padding"
@@ -112,6 +112,6 @@ export default function Login() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScreenWrapper>
+    </AuthScreenWrapper>
   );
 }
