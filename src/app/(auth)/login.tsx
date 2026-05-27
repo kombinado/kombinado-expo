@@ -1,5 +1,5 @@
-import { ScreenWrapper } from "@/components/ScreenWraper";
 import { useAuth } from "@/hooks/useAuth";
+import { ScreenWrapper } from "@/src/components/ScreenWraper";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -36,7 +36,8 @@ export default function Login() {
       // A proteção de rotas reativa no app/_layout.tsx se encarrega de redirecionar para /home
     } catch (err: any) {
       setErrorMessage(
-        err.message || "Erro ao tentar fazer login. Verifique suas credenciais."
+        err.message ||
+          "Erro ao tentar fazer login. Verifique suas credenciais.",
       );
     } finally {
       setIsSubmitting(false);
@@ -52,7 +53,7 @@ export default function Login() {
         >
           <View className="items-center">
             <Image
-              source={require("../../assets/images/kombi-auth-vector-image.svg")}
+              source={require("@/assets/images/kombi-auth-vector-image.svg")}
               style={{ width: 200, height: 100 }}
               contentFit="contain"
             />
@@ -143,7 +144,10 @@ export default function Login() {
             <Text className="mr-1 text-[#FAF9F9]">
               Ainda não possui uma conta?
             </Text>
-            <Pressable onPress={() => router.push("/signup")} disabled={isSubmitting}>
+            <Pressable
+              onPress={() => router.push("/signup")}
+              disabled={isSubmitting}
+            >
               <Text className="text-[#FAF9F9] font-bold">Criar Conta</Text>
             </Pressable>
           </View>

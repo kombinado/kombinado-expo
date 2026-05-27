@@ -1,5 +1,5 @@
-import { ScreenWrapper } from "@/components/ScreenWraper";
 import { useAuth } from "@/hooks/useAuth";
+import { ScreenWrapper } from "@/src/components/ScreenWraper";
 import { LogOut, UserCircle } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

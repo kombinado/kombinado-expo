@@ -1,9 +1,9 @@
+import "@/global.css";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider } from "@/src/context/auth/AuthProvider";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { AuthProvider } from "../context/auth/AuthProvider";
-import { useAuth } from "../hooks/useAuth";
-import "../global.css";
 
 function NavigationGuard() {
   const { userToken, isLoading } = useAuth();

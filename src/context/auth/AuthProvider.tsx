@@ -1,6 +1,6 @@
+import { api, setOnUnauthorized } from "@/services/api";
+import { tokenStorage } from "@/services/storage";
 import React, { createContext, useEffect, useState } from "react";
-import { api, setOnUnauthorized } from "../../services/api";
-import { tokenStorage } from "../../services/storage";
 
 export interface UserProfile {
   name: string;
@@ -67,7 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(profileData);
         setUserToken(accessToken);
       } else {
-        throw new Error(response.message || "Erro desconhecido ao fazer login.");
+        throw new Error(
+          response.message || "Erro desconhecido ao fazer login.",
+        );
       }
     } catch (error: any) {
       console.log("[AuthProvider] Aviso no signIn:", error.message);

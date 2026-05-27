@@ -1,5 +1,5 @@
-import { ScreenWrapper } from "@/components/ScreenWraper";
 import { useAuth } from "@/hooks/useAuth";
+import { ScreenWrapper } from "@/src/components/ScreenWraper";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -73,7 +73,8 @@ export default function SignUp() {
       });
     } catch (err: any) {
       setErrorMessage(
-        err.message || "Erro ao realizar cadastro. Verifique os dados inseridos."
+        err.message ||
+          "Erro ao realizar cadastro. Verifique os dados inseridos.",
       );
     } finally {
       setIsSubmitting(false);
@@ -90,7 +91,7 @@ export default function SignUp() {
           >
             <View className="items-center mt-2">
               <Image
-                source={require("../../assets/images/kombi-auth-vector-image.svg")}
+                source={require("@/assets/images/kombi-auth-vector-image.svg")}
                 style={{ width: 200, height: 100 }}
                 contentFit="contain"
               />
@@ -222,7 +223,7 @@ export default function SignUp() {
                   <Text className="text-center font-bold text-[#E84855] text-base uppercase tracking-wider">
                     Informações do Veículo
                   </Text>
-                  
+
                   <TextInput
                     className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
                     placeholder="Modelo do Veículo"
@@ -287,7 +288,10 @@ export default function SignUp() {
 
             <View className="flex-row self-center">
               <Text className="mr-1 text-[#FAF9F9]">Já possui uma conta?</Text>
-              <Pressable onPress={() => router.push("/login")} disabled={isSubmitting}>
+              <Pressable
+                onPress={() => router.push("/login")}
+                disabled={isSubmitting}
+              >
                 <Text className="text-[#FAF9F9] font-bold">Entrar</Text>
               </Pressable>
             </View>
