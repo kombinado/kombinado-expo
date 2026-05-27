@@ -1,8 +1,7 @@
-import { Search, X } from "lucide-react-native"; // Adicionei o X para limpar a busca
+import { Search, X } from "lucide-react-native";
 import React, { useState } from "react";
 import { Pressable, TextInput, TextInputProps, View } from "react-native";
 
-// 1. Estendemos as props do TextInput e garantimos o controle de estado
 interface SearchBarProps extends TextInputProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -28,7 +27,6 @@ export function SearchBar({
     <View
       className={`flex-row items-center w-full px-4 py-2 rounded-2xl border-2 transition-colors ${bgColor} ${borderColor}`}
     >
-      {/* Ícone Dinâmico */}
       <Search size={22} color={iconColor} strokeWidth={2.5} />
 
       <TextInput
@@ -49,10 +47,9 @@ export function SearchBar({
         {...rest}
       />
 
-      {/* Botão Limpar (Bônus de UX): Só aparece se tiver texto! */}
       {value.length > 0 && (
         <Pressable
-          onPress={() => onChangeText("")} // Zera a pesquisa na hora
+          onPress={() => onChangeText("")}
           className="p-1 rounded-full active:opacity-50 ml-1"
           accessibilityRole="button"
           accessibilityLabel="Limpar texto da pesquisa"
