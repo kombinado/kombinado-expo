@@ -1,50 +1,61 @@
-# Welcome to your Expo app 👋
+# 🚌 Kombinado App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bem-vindo ao aplicativo móvel do **Kombinado**, a comunidade universitária de caronas!  
+Este é o front-end móvel construído com **React Native** e **Expo**.
 
-## Get started
+## 🚀 Status do Projeto e Funcionalidades
 
-1. Install dependencies
+Atualmente, o aplicativo possui uma arquitetura robusta e profissional de **Autenticação**, totalmente integrada com nossa API em `.NET 8`.
 
-   ```bash
-   npm install
-   ```
+### Funcionalidades Concluídas:
+* **Telas Premium**: Interface fluida usando `NativeWind` para as telas de Login, Cadastro e Perfil.
+* **Comunicação Segura**: Cliente HTTP customizado (`fetch`) que injeta automaticamente o token JWT nas requisições protegidas.
+* **Auto-Refresh de Sessão**: Rotação invisível e automática de Refresh Tokens. Se o seu token de acesso expirar, o app consome a rota `/api/Auth/refresh` e renova a sessão em segundo plano, não interrompendo a experiência do usuário.
+* **Armazenamento Criptografado**: Uso do `expo-secure-store` para guardar os tokens e os dados vitais do usuário de forma inviolável no chaveiro do sistema operacional.
+* **Route Guarding reativo**: Controle de fluxo rígido baseado em estados, impedindo acessos a páginas privadas sem login e redirecionando o usuário de forma limpa.
+* **Tratamento Resiliente de Erros**: O cliente de API está blindado contra erros catastróficos do servidor (como páginas 500 HTML) e exibe notificações localizadas nos formulários.
 
-2. Start the app
+## 🛠️ Tecnologias
+* [Expo](https://expo.dev) SDK 54
+* [React Native](https://reactnative.dev)
+* [NativeWind](https://www.nativewind.dev/) (Tailwind CSS)
+* [Expo Router](https://docs.expo.dev/router/introduction) (Roteamento moderno baseado em arquivos)
+* [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/)
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## ⚙️ Como Rodar o Projeto (com a API Local)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Para que o aplicativo mobile consiga se comunicar com a API rodando em sua máquina, é estritamente necessário configurar as portas de rede, visto que simuladores e celulares rodam em redes diferentes da sua máquina.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Passo 1: Iniciar a API .NET liberando acesso de rede
+Por padrão, a API .NET 8 aceita apenas conexões do próprio `localhost`. Para que o emulador Android ou seu celular físico consigam acessar a API de fora, você deve instruir o `.NET` a escutar em **todas as interfaces de rede (`0.0.0.0`)**.
 
-## Get a fresh project
+Abra o terminal na pasta do repositório da sua API (`Kombinado.Api`) e rode o comando de inicialização forçando uma **porta HTTP** (ex: `5198`):
+```bash
+dotnet run --urls "http://0.0.0.0:5198"
+```
+> **⚠️ Aviso Importante (Android):** Dê preferência a testar via porta `HTTP` não-segura localmente. O cliente nativo do Android recusa conexões `HTTPS` com certificados locais de desenvolvimento autoassinados, o que causará erros de *Network Request Failed* no aplicativo.
 
-When you're ready, run:
+### Passo 2: Configurar o Endereço no Aplicativo (Arquivo `.env`)
+Na raiz deste projeto Expo, crie um arquivo chamado `.env` (ou copie e renomeie o `.env.example`).
+O endereço que você colocará dependerá de onde o app está rodando:
+
+* **Emulador Android**: Use o IP **`[IP_ADDRESS]`** (este é o gateway interno do emulador que aponta para o localhost do seu computador).
+  ```env
+  EXPO_PUBLIC_API_URL=http://[IP_ADDRESS]:5198
+  ```
+* **Celular Físico / Expo Go via Wi-Fi**: Use o IP real da sua máquina na rede local (ex: `[IP_ADDRESS]`).
+  ```env
+  EXPO_PUBLIC_API_URL=http://[IP_ADDRESS]:5198
+  ```
+
+### Passo 3: Rodar o Aplicativo
+Após configurar o `.env`, instale as dependências e inicie o servidor do Expo limpando o cache para garantir que a variável de ambiente foi lida:
 
 ```bash
-npm run reset-project
+npm install
+npx expo start -c
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+No terminal, pressione **`a`** para abrir no Emulador Android, ou escaneie o QR Code usando o aplicativo Expo Go no seu celular Android!

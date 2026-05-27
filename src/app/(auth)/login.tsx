@@ -1,9 +1,10 @@
+import { useAuth } from "@/hooks/useAuth";
 import { ScreenWrapper } from "@/src/components/ScreenWraper";
-import { useAuth } from "@/src/context/auth/AuthProvider";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Pressable,
   Text,
@@ -15,19 +16,32 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { successSignup } = useLocalSearchParams<{ successSignup?: string }>();
   const { signIn } = useAuth();
 
-  const handleLogin = () => {
-    // Uma validação simples só para simular um formulário real
+  const handleLogin = async () => {
     if (!email || !password) {
-      alert("Por favor, preencha e-mail e senha!");
+      setErrorMessage("Por favor, preencha e-mail e senha!");
       return;
     }
 
-    // 3. Executa a função fake!
-    // Isso vai mudar o userToken para "token_fake" no AuthProvider
-    signIn(email, password);
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      await signIn(email, password);
+      // A proteção de rotas reativa no app/_layout.tsx se encarrega de redirecionar para /home
+    } catch (err: any) {
+      setErrorMessage(
+        err.message ||
+          "Erro ao tentar fazer login. Verifique suas credenciais.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -39,7 +53,7 @@ export default function Login() {
         >
           <View className="items-center">
             <Image
-              source={require("../../../assets/images/kombi-auth-vector-image.svg")}
+              source={require("@/assets/images/kombi-auth-vector-image.svg")}
               style={{ width: 200, height: 100 }}
               contentFit="contain"
             />
@@ -52,10 +66,27 @@ export default function Login() {
                 Bem-vindo à comunidade
               </Text>
               <Text className="text-lg text-wrap text-[#040F0F] ">
-                Acesse sua conta institucional para a encontrar caronas e
-                colegas.
+                Acesse sua conta institucional para encontrar caronas e colegas.
               </Text>
             </View>
+
+            {/* Banner de Sucesso (Se vindo de Cadastro) */}
+            {successSignup === "true" && (
+              <View className="bg-emerald-100 border border-emerald-400 p-4 rounded-xl">
+                <Text className="text-emerald-800 font-bold text-center text-sm">
+                  Conta cadastrada com sucesso! Faça seu login abaixo.
+                </Text>
+              </View>
+            )}
+
+            {/* Banner de Erro */}
+            {errorMessage ? (
+              <View className="bg-rose-100 border border-rose-400 p-4 rounded-xl">
+                <Text className="text-rose-800 font-bold text-center text-sm">
+                  {errorMessage}
+                </Text>
+              </View>
+            ) : null}
 
             <View className="flex-col gap-y-5">
               <TextInput
@@ -66,6 +97,7 @@ export default function Login() {
                 placeholderTextColor="#FAF9F9"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={!isSubmitting}
                 accessible={true}
                 accessibilityLabel="Campo de e-mail institucional"
                 accessibilityHint="Digite seu e-mail do IFTM para acessar o aplicativo"
@@ -77,36 +109,45 @@ export default function Login() {
                 value={password}
                 onChangeText={setPassword}
                 placeholderTextColor="#FAF9F9"
-                keyboardType="default"
                 secureTextEntry={true}
-                autoCapitalize="words"
+                autoCapitalize="none"
+                editable={!isSubmitting}
                 accessible={true}
-                accessibilityLabel="Campo de Nome Completo"
-                accessibilityHint="Digite seu Nome Completo para acessar o aplicativo"
+                accessibilityLabel="Campo de senha"
+                accessibilityHint="Digite sua senha para acessar o aplicativo"
               />
             </View>
 
-            {/* Botão Principal Gamificado */}
+            {/* Botão Principal */}
             <Pressable
-              className="mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95"
+              className={`mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95 ${
+                isSubmitting ? "opacity-60" : ""
+              }`}
               onPress={handleLogin}
-              // Acessibilidade do Botão
+              disabled={isSubmitting}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Botão Entrar"
               accessibilityHint="Toque para fazer login e buscar caronas"
             >
-              <Text className="text-white text-xl font-extrabold tracking-widest">
-                Entrar
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator color="#FAF9F9" />
+              ) : (
+                <Text className="text-white text-xl font-extrabold tracking-widest">
+                  Entrar
+                </Text>
+              )}
             </Pressable>
           </View>
 
           <View className="flex-row self-center">
-            <Text className="mr-1  text-[#FAF9F9]">
+            <Text className="mr-1 text-[#FAF9F9]">
               Ainda não possui uma conta?
             </Text>
-            <Pressable onPress={() => router.push("/signup")}>
+            <Pressable
+              onPress={() => router.push("/signup")}
+              disabled={isSubmitting}
+            >
               <Text className="text-[#FAF9F9] font-bold">Criar Conta</Text>
             </Pressable>
           </View>
