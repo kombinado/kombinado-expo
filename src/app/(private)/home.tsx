@@ -1,3 +1,4 @@
+import { RequestedRideCard } from "@/src/components/feature/RequestedRideCard";
 import { RideCard } from "@/src/components/feature/RideCard";
 import { SearchBar } from "@/src/components/feature/SearchBar";
 import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
@@ -19,26 +20,47 @@ export default function Home() {
         <ToggleButton value={isToRequest} onToggle={setisToRequest} />
       </View>
 
-      <View className="mb-10">
-        <SearchBar
-          value={destiny}
-          placeholder="Pra onde vamos?"
-          onChangeText={setDestiny}
-        />
-      </View>
+      {isToRequest && (
+        <View>
+          <View className="mb-10">
+            <SearchBar
+              value={destiny}
+              placeholder="Pra onde vamos?"
+              onChangeText={setDestiny}
+            />
+          </View>
 
-      <RideCard
-        driverName="Jose Macciotti"
-        carModel="Kombi"
-        carColor="Branco"
-        carPlate="NFK8B93"
-        date="27/05"
-        time="22h"
-        origin="Campus IFTM"
-        destination="Terminal Oeste"
-        availableSpots={3}
-        onRequestRide={() => console.log("Carona solicitada")}
-      />
+          <RideCard
+            driverName="Jose Macciotti"
+            carModel="Kombi"
+            carColor="Branco"
+            carPlate="NFK8B93"
+            date="27/05"
+            time="22h"
+            origin="Campus IFTM"
+            destination="Terminal Oeste"
+            availableSpots={3}
+            onRequestRide={() => console.log("Carona solicitada")}
+          />
+        </View>
+      )}
+
+      {!isToRequest && (
+        <RequestedRideCard
+          driverName="Lucas Emmanuel"
+          carModel="Toyota Corolla"
+          carColor="Cinza"
+          carPlate="GSK4715"
+          date="01/06"
+          time="21h"
+          origin="Campus IFTM"
+          destination="Terminal Oeste"
+          status="pendente"
+          onCancelRequest={() => console.log("Cancelando")}
+          onSuggestStopPress={() => console.log("Sugerindo")}
+          onWhatsAppPress={() => console.log("Indo para o WhatsApp")}
+        />
+      )}
     </ScreenWrapper>
   );
 }
