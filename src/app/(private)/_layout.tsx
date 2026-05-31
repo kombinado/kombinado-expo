@@ -13,7 +13,7 @@ export default function AppLayout() {
   return (
     <Tabs
       screenOptions={{
-        header: () => <Header />,
+        header: () => <Header firstName="Lucas" />,
 
         tabBarStyle: {
           backgroundColor: "#E84855",

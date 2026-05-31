@@ -3,16 +3,18 @@ import React from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export function Header() {
-  // Pegamos a altura exata da barra de status (varia de iPhone para Android)
+// 1. Criamos a "tomada" do componente. Ele agora exige receber um primeiro nome.
+export interface HeaderProps {
+  firstName: string;
+}
+
+// 2. Extraímos o firstName de dentro das chaves (desestruturação)
+export function Header({ firstName }: HeaderProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View
       style={{ paddingTop: insets.top + 16 }}
-      // 1. Removi o h-16 (Deixa o conteúdo ditar a altura)
-      // 2. Adicionei pb-4 (Padding Bottom)
-      // 3. Adicionei items-center (Para alinhar a imagem com o texto verticalmente)
       className="bg-[#E84855] px-5 pb-4 flex-row gap-3 items-center"
     >
       <Image
@@ -22,7 +24,8 @@ export function Header() {
       />
 
       <View>
-        <Text className="text-red-100 font-bold text-xs">Olá, Felipe</Text>
+        {/* 3. Injetamos a variável usando as chaves no JSX */}
+        <Text className="text-red-100 font-bold text-xs">Olá, {firstName}</Text>
         <Text className="text-white text-xl font-black">
           Bem-vindo de volta!
         </Text>
