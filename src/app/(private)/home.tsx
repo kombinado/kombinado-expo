@@ -17,7 +17,12 @@ export default function Home() {
       </View>
 
       <View className="mb-10">
-        <ToggleButton value={isToRequest} onToggle={setisToRequest} />
+        <ToggleButton
+          value={isToRequest}
+          onToggle={setisToRequest}
+          labelLeft="Solicitar"
+          labelRight="Solicitadas"
+        />
       </View>
 
       {isToRequest && (
