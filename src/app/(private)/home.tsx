@@ -1,6 +1,7 @@
 import { RequestedRideCard } from "@/src/components/feature/RequestedRideCard";
 import { RideCard } from "@/src/components/feature/RideCard";
 import { SearchBar } from "@/src/components/feature/SearchBar";
+import { SuggestStopModal } from "@/src/components/feature/SuggestStopModal";
 import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
 import { ToggleButton } from "@/src/components/ui/ToggleButton";
 import { useState } from "react";
@@ -9,6 +10,16 @@ import { Text, View } from "react-native";
 export default function Home() {
   const [isToRequest, setisToRequest] = useState(false);
   const [destiny, setDestiny] = useState("");
+
+  // Estado para controlar a visibilidade do modal
+  const [isSuggestModalVisible, setIsSuggestModalVisible] = useState(false);
+
+  // Função que recebe a string digitada no modal
+  const handleSuggestStop = (suggestion: string) => {
+    console.log("O passageiro sugeriu a parada:", suggestion);
+    // Aqui você enviará a sugestão para a sua API
+    // api.post(`/rides/suggest-stop/${rideId}`, { stop: suggestion });
+  };
 
   return (
     <ScreenWrapper>
@@ -62,10 +73,16 @@ export default function Home() {
           destination="Terminal Oeste"
           status="pendente"
           onCancelRequest={() => console.log("Cancelando")}
-          onSuggestStopPress={() => console.log("Sugerindo")}
+          onSuggestStopPress={() => setIsSuggestModalVisible(true)}
           onWhatsAppPress={() => console.log("Indo para o WhatsApp")}
         />
       )}
+
+      <SuggestStopModal
+        isVisible={isSuggestModalVisible}
+        onClose={() => setIsSuggestModalVisible(false)}
+        onSubmit={handleSuggestStop}
+      />
     </ScreenWrapper>
   );
 }
