@@ -1,9 +1,8 @@
-import { Header } from "@/src/components/Header";
+import { useAuth } from "@/hooks/useAuth";
 import { Tabs } from "expo-router";
 import { Car, House, User } from "lucide-react-native";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth/AuthProvider";
 
 export default function AppLayout() {
   const { signOut } = useAuth();
