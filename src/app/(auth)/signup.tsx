@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -82,7 +82,7 @@ export default function SignUp() {
   };
 
   return (
-    <ScreenWrapper>
+    <AuthScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
         <KeyboardAvoidingView behavior="padding" className="flex-1 px-8 py-4">
           <ScrollView
@@ -298,6 +298,6 @@ export default function SignUp() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScreenWrapper>
+    </AuthScreenWrapper>
   );
 }

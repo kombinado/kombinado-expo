@@ -8,7 +8,7 @@ interface ScreenWrapperProps {
 
 export function ScreenWrapper({ children }: ScreenWrapperProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#E84855]">
+    <SafeAreaView className="flex-1 bg-[#FFF]">
       <ScrollView
         className="flex-1"
         contentContainerClassName="flex-grow p-6"

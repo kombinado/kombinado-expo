@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { ScreenWrapper } from "@/src/components/ScreenWraper";
+import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -45,7 +45,7 @@ export default function Login() {
   };
 
   return (
-    <ScreenWrapper>
+    <AuthScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
         <KeyboardAvoidingView
           behavior="padding"
@@ -153,6 +153,6 @@ export default function Login() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ScreenWrapper>
+    </AuthScreenWrapper>
   );
 }
