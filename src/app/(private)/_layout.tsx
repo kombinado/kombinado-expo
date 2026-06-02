@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { Header } from "@/src/components/Header";
 import { Tabs } from "expo-router";
 import { Car, House, User } from "lucide-react-native";
 import { View } from "react-native";
