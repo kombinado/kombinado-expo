@@ -1,16 +1,16 @@
-import { useAuth } from "@/hooks/useAuth";
 import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
+import { useAuth } from "@/src/hooks/useAuth";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
