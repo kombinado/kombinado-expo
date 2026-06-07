@@ -38,9 +38,8 @@ const processQueue = (error: any, token: string | null = null) => {
     } else {
       // Injeta o novo token no cabeçalho das requisições enfileiradas
       if (prom.config.options.headers) {
-        (prom.config.options.headers as any)[
-          "Authorization"
-        ] = `Bearer ${token}`;
+        (prom.config.options.headers as any)["Authorization"] =
+          `Bearer ${token}`;
       }
       // Re-executa a requisição original
       fetch(`${BASE_URL}${prom.config.path}`, prom.config.options)
@@ -55,7 +54,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 async function request<T = any>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
 
@@ -156,8 +155,13 @@ async function request<T = any>(
     try {
       data = JSON.parse(textResponse);
     } catch (parseError) {
-      console.error("[API] O servidor não retornou JSON válido:", textResponse.substring(0, 150));
-      throw new Error("Servidor indisponível ou ocorreu um erro interno. Tente novamente mais tarde.");
+      console.error(
+        "[API] O servidor não retornou JSON válido:",
+        textResponse.substring(0, 150),
+      );
+      throw new Error(
+        "Servidor indisponível ou ocorreu um erro interno. Tente novamente mais tarde.",
+      );
     }
 
     return data as ApiResponse<T>;
@@ -166,7 +170,7 @@ async function request<T = any>(
     // Caso seja erro de certificado ou falta de conexão
     if (error.message && error.message.includes("Network request failed")) {
       throw new Error(
-        "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado)."
+        "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado).",
       );
     }
     throw error;

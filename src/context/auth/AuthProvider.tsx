@@ -4,6 +4,7 @@ import React, { createContext, useEffect, useState } from "react";
 
 export interface UserProfile {
   name: string;
+  email?: string;
   isDriver: boolean;
 }
 
@@ -60,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await tokenStorage.saveTokens(accessToken, refreshToken);
 
         // Salva dados de perfil no SecureStore
-        const profileData = { name, isDriver };
+        const profileData = { name, email, isDriver };
         await tokenStorage.saveUserData(profileData);
 
         // Atualiza estados locais de forma atômica
