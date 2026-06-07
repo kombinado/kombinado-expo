@@ -1,5 +1,8 @@
-import { useMemo } from "react";
+import { api } from "@/services/api";
 import { useAuth } from "@/src/hooks/useAuth";
+import { useEffect, useMemo, useState } from "react";
+// Importe o seu cliente de API aqui. Exemplo:
+// import { api } from "@/src/services/api";
 
 export interface AppProfile {
   name: string;
@@ -13,31 +16,76 @@ export interface AppProfile {
   vehiclePlate: string | null;
 }
 
-const unavailable = "Não disponível pela API atual";
-
 export function useProfile() {
-  const { user, signOut, isLoading } = useAuth();
+  // 1. Pegamos os dados do Auth
+  const { user, signOut, isLoading: isAuthLoading } = useAuth();
 
+  // 2. Novos estados para gerenciar a chamada da API
+  const [apiData, setApiData] = useState<Partial<AppProfile> | null>(null);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 3. O Efeito: Dispara a busca assim que descobrirmos quem é o usuário logado
+  useEffect(() => {
+    // Se não tiver usuário logado (ou se ainda estiver carregando o Auth), não faz a chamada
+    if (!user?.email) return;
+
+    const fetchProfileData = async () => {
+      setIsFetchingProfile(true);
+      setError(null);
+
+      try {
+        // AQUI ACONTECE A MÁGICA REAL:
+        // Substitua essa linha pela sua rota real da API.
+        const response = await api.get(`/users/profile`);
+        setApiData(response.data);
+
+        // --- SIMULAÇÃO DE API PARA VOCÊ TESTAR (Apague depois) ---
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setApiData({
+          course: "Ciência da Computação",
+          whatsApp: "+55 34 99999-9999",
+          isDriver: true,
+          vehicleModel: "Honda Civic",
+          vehicleColor: "Branco",
+          vehiclePlate: "QOY-4581",
+        });
+        // --------------------------------------------------------
+      } catch (err) {
+        console.error("Erro ao buscar perfil:", err);
+        setError("Não foi possível carregar os dados completos do perfil.");
+      } finally {
+        setIsFetchingProfile(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]); // Re-executa se o usuário trocar de conta
+
+  // 4. O useMemo agora atua como um "Mesclador Seguro" (Safety Net)
+  // Ele junta os dados básicos do Auth com os dados ricos da API e calcula o firstName
   const profile = useMemo<AppProfile>(() => {
-    const name = user?.name || "Usuário Kombinado";
+    const name = apiData?.name || user?.name || "Usuário Kombinado";
     const firstName = name.trim().split(/\s+/)[0] || "Usuário";
 
     return {
       name,
       firstName,
-      email: user?.email || unavailable,
-      course: unavailable,
-      whatsApp: unavailable,
-      isDriver: user?.isDriver ?? false,
-      vehicleModel: null,
-      vehicleColor: null,
-      vehiclePlate: null,
+      email: apiData?.email || user?.email || "Email não encontrado",
+      course: apiData?.course || "Curso não informado",
+      whatsApp: apiData?.whatsApp || "WhatsApp não cadastrado",
+      isDriver: apiData?.isDriver ?? user?.isDriver ?? false,
+      vehicleModel: apiData?.vehicleModel || null,
+      vehicleColor: apiData?.vehicleColor || null,
+      vehiclePlate: apiData?.vehiclePlate || null,
     };
-  }, [user]);
+  }, [user, apiData]);
 
   return {
     profile,
     signOut,
-    isLoading,
+    // O App está "carregando" se o Auth estiver processando OU se a API estiver buscando
+    isLoading: isAuthLoading || isFetchingProfile,
+    error,
   };
 }
