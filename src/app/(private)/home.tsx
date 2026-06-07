@@ -67,14 +67,7 @@ export default function Home() {
     }
 
     const digits = phoneNumber.replace(/\D/g, "");
-    await Linking.openURL(`https://wa.me/${digits}`);
-  };
-
-  const showSuggestStopUnavailable = () => {
-    Alert.alert(
-      "Sugestão já enviada",
-      "A API atual recebe a parada sugerida no momento em que você solicita a vaga.",
-    );
+    await Linking.openURL(`https://wa.me/+55${digits}`);
   };
 
   return (
@@ -172,10 +165,7 @@ export default function Home() {
                 canContactDriver={Boolean(request.phoneNumber)}
                 isCancelling={cancelingRequestId === request.id}
                 onCancelRequest={() => cancelRequest(request.id)}
-                onSuggestStopPress={showSuggestStopUnavailable}
-                onWhatsAppPress={() =>
-                  handleWhatsAppPress(request.phoneNumber)
-                }
+                onWhatsAppPress={() => handleWhatsAppPress(request.phoneNumber)}
               />
             ))
           )}

@@ -161,7 +161,7 @@ export default function Profile() {
         <ChevronRight size={20} color="#cbd5e1" />
       </Pressable>
 
-      <Pressable className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl active:bg-red-100 active:scale-95 transition-all mt-4 mb-8">
+      <Pressable onPress={signOut} className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl active:bg-red-100 active:scale-95 transition-all mt-4 mb-8">
         <LogOut size={22} color="#E84855" strokeWidth={2.5} />
         <Text className="text-[#E84855] font-black text-lg ml-2">
           Sair do Aplicativo

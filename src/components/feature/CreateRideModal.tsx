@@ -42,6 +42,18 @@ export function CreateRideModal({
     setSpots("");
   };
 
+  const handleTimeChange = (text: string) => {
+    // Remove qualquer coisa que não seja número
+    const numbers = text.replace(/\D/g, "");
+    
+    // Adiciona o ":" após os dois primeiros dígitos
+    if (numbers.length <= 2) {
+      setTime(numbers);
+    } else {
+      setTime(`${numbers.slice(0, 2)}:${numbers.slice(2, 4)}`);
+    }
+  };
+
   const handleCreate = async () => {
     if (!origin || !destination || !time || !spots || isSubmitting) return;
 
@@ -141,7 +153,7 @@ export function CreateRideModal({
                       <Clock size={20} color="#94a3b8" />
                       <TextInput
                         value={time}
-                        onChangeText={setTime}
+                        onChangeText={handleTimeChange}
                         placeholder="07:30"
                         keyboardType="numeric"
                         maxLength={5}
@@ -162,7 +174,7 @@ export function CreateRideModal({
                         value={spots}
                         onChangeText={setSpots}
                         placeholder="Ex: 4"
-                        keyboardType="numeric"
+                        keyboardType="number-pad"
                         maxLength={1}
                         className="flex-1 ml-3 text-lg font-semibold text-slate-800"
                         placeholderTextColor="#cbd5e1"
@@ -176,11 +188,10 @@ export function CreateRideModal({
 
             <Pressable
               onPress={handleCreate}
-              className={`w-full py-4 rounded-xl items-center shadow-lg transition-all mt-4 ${
-                canSubmit
-                  ? "bg-[#E84855] active:bg-red-600 active:scale-95 shadow-red-900/20"
-                  : "bg-slate-300"
-              }`}
+              className={`w-full py-4 rounded-xl items-center shadow-lg transition-all mt-4 ${canSubmit
+                ? "bg-[#E84855] active:bg-red-600 active:scale-95 shadow-red-900/20"
+                : "bg-slate-300"
+                }`}
               disabled={!canSubmit}
             >
               {isSubmitting ? (

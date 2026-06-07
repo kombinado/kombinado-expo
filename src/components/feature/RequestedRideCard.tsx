@@ -5,7 +5,6 @@ import {
   LocateFixed,
   MapPin,
   MessageCircle,
-  PlusCircle,
 } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -22,7 +21,6 @@ export interface RequestedRideCardProps {
   status: "aceita" | "pendente" | "negada";
   onCancelRequest: () => void;
   onWhatsAppPress: () => void;
-  onSuggestStopPress: () => void;
   canContactDriver?: boolean;
   isCancelling?: boolean;
 }
@@ -39,7 +37,6 @@ export function RequestedRideCard({
   status,
   onCancelRequest,
   onWhatsAppPress,
-  onSuggestStopPress,
   canContactDriver = false,
   isCancelling = false,
 }: RequestedRideCardProps) {
@@ -151,18 +148,6 @@ export function RequestedRideCard({
             <MessageCircle size={22} color="#FFF" strokeWidth={2.5} />
             <Text className="text-white text-lg font-black tracking-wider">
               Falar no WhatsApp
-            </Text>
-          </Pressable>
-        ) : null}
-
-        {status !== "negada" ? (
-          <Pressable
-            onPress={onSuggestStopPress}
-            className="w-full bg-white py-3.5 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-slate-100 active:scale-95 transition-all"
-          >
-            <PlusCircle size={22} color="#E84855" strokeWidth={2.5} />
-            <Text className="text-[#E84855] text-lg font-black tracking-wider">
-              Sugerir Parada
             </Text>
           </Pressable>
         ) : null}

@@ -1,31 +1,104 @@
 import { CreateRideModal } from "@/src/components/feature/CreateRideModal";
+import { DriverRideCard } from "@/src/components/feature/DriverRideCard";
+import { RequestsModal } from "@/src/components/feature/RequestsModal";
+import { formatRideDate, formatRideTime } from "@/src/hooks/apiTypes";
 import { useCreateRide } from "@/src/hooks/useCreateRide";
-import { Plus } from "lucide-react-native"; // <-- 1. Importação do Ícone
+import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
+import { useDriverRides } from "@/src/hooks/useDriverRides";
+import { Plus } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native"; // <-- Importe o Pressable
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 
 export default function Driver() {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
 
-  const { createRide, error, isLoading } = useCreateRide();
+  const { createRide, error: createError } = useCreateRide();
+  const {
+    activeRides,
+    isLoading: isRidesLoading,
+    error: ridesError,
+    cancelRide,
+    cancelingRideId,
+    refetch: refetchRides,
+  } = useDriverRides();
+
+  const {
+    requests,
+    isLoading: isRequestsLoading,
+    error: requestsError,
+    actionError,
+    respondToRequest,
+    respondingRequestId,
+  } = useDriverRideRequests(selectedRideId);
+
+  const handleCreateRide = async (data: any) => {
+    const success = await createRide(data);
+    if (success) {
+      setIsCreateModalVisible(false);
+      refetchRides();
+    } else {
+      Alert.alert("Erro", "Não foi possível criar a carona.");
+    }
+  };
+
+  const handleCancelRide = (rideId: string) => {
+    Alert.alert(
+      "Cancelar Carona",
+      "Tem certeza que deseja cancelar esta carona? Todas as solicitações serão canceladas.",
+      [
+        { text: "Não", style: "cancel" },
+        {
+          text: "Sim, Cancelar",
+          style: "destructive",
+          onPress: async () => {
+            const success = await cancelRide(rideId);
+            if (!success) {
+              Alert.alert("Erro", "Não foi possível cancelar a carona.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View className="flex-1 bg-[#FAF9F9]">
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {/* <DriverRideCard
-          date="Amanhã"
-          time="07h30"
-          origin="Terminal Leste"
-          destination="Campus IFTM"
-          occupiedSpots={occupiedSpotsCount}
-          totalSpots={4}
-          onCancelRide={() => console.log("Carona cancelada")}
-          onViewRequests={() => setIsModalVisible(true)}
-        /> */}
+        {isRidesLoading ? (
+          <ActivityIndicator color="#E84855" size="large" />
+        ) : ridesError ? (
+          <View className="items-center mt-10">
+            <Text className="text-rose-700 font-bold text-center mb-4">{ridesError}</Text>
+            <Pressable onPress={() => refetchRides()} className="bg-[#E84855] px-6 py-3 rounded-full">
+              <Text className="text-white font-bold">Tentar Novamente</Text>
+            </Pressable>
+          </View>
+        ) : activeRides.length === 0 ? (
+          <View className="items-center mt-20">
+            <Text className="text-slate-500 font-semibold text-lg text-center">
+              Você ainda não ofereceu nenhuma carona ativa.
+            </Text>
+          </View>
+        ) : (
+          activeRides.map((ride) => (
+            <DriverRideCard
+              key={ride.id}
+              date={formatRideDate(ride.departureTime)}
+              time={formatRideTime(ride.departureTime)}
+              origin={ride.origin}
+              destination={ride.destination}
+              occupiedSpots={ride.totalSeats - ride.availableSeats}
+              totalSpots={ride.totalSeats}
+              onCancelRide={() => handleCancelRide(ride.id)}
+              onViewRequests={() => setSelectedRideId(ride.id)}
+              isCancelling={cancelingRideId === ride.id}
+              hasPendingRequests={false} 
+            />
+          ))
+        )}
       </ScrollView>
 
-      {/* 2. BOTÃO FLUTUANTE (FAB) */}
-      {/* Absolute tira o botão do fluxo, right-6 e bottom-6 fixam ele no canto */}
       <Pressable
         onPress={() => setIsCreateModalVisible(true)}
         className="absolute right-6 bottom-6 w-16 h-16 bg-black rounded-full items-center justify-center shadow-lg shadow-black/40 active:scale-90 active:bg-black/70 transition-all z-10"
@@ -35,19 +108,24 @@ export default function Driver() {
         <Plus size={32} color="#FFF" strokeWidth={2.5} />
       </Pressable>
 
-      {/* <RequestsModal
-        isVisible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+      <RequestsModal
+        isVisible={selectedRideId !== null}
+        onClose={() => setSelectedRideId(null)}
         requests={requests}
-        onAccept={handleAcceptRequest}
-        onReject={handleRejectRequest}
-        onRemoveAccepted={handleRemoveAcceptedRequest}
-      /> */}
+        onAccept={async (id) => {
+          await respondToRequest(id, true);
+          refetchRides();
+        }}
+        onReject={(id) => respondToRequest(id, false)}
+        isLoading={isRequestsLoading}
+        errorMessage={requestsError || actionError}
+        respondingRequestId={respondingRequestId}
+      />
 
       <CreateRideModal
         isVisible={isCreateModalVisible}
         onClose={() => setIsCreateModalVisible(false)}
-        onSubmit={createRide}
+        onSubmit={handleCreateRide}
       />
     </View>
   );
