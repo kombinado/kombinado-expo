@@ -151,7 +151,7 @@ async function request<T = any>(
 
     // Lê a resposta como texto e tenta fazer o parse seguro para evitar quebra com erros 500 HTML
     const textResponse = await response.text();
-    let data;
+    let data: any;
     try {
       data = JSON.parse(textResponse);
     } catch (parseError) {
@@ -162,6 +162,23 @@ async function request<T = any>(
       throw new Error(
         "Servidor indisponível ou ocorreu um erro interno. Tente novamente mais tarde.",
       );
+    }
+
+    if (!response.ok) {
+      let errorMessage = "Ocorreu um erro ao processar a requisição.";
+
+      if (data.message) {
+        errorMessage = data.message;
+      } else if (data.errors && typeof data.errors === "object") {
+        const errorMessages = Object.values(data.errors).flat();
+        if (errorMessages.length > 0) {
+          errorMessage = errorMessages.join("\n");
+        }
+      } else if (data.title) {
+        errorMessage = data.title;
+      }
+
+      throw new Error(errorMessage);
     }
 
     return data as ApiResponse<T>;
