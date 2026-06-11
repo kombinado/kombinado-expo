@@ -20,6 +20,7 @@ export function useAvailableRides(searchTerm = "") {
   const loadRides = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setRequestError(null);
 
     try {
       const response = await api.get<RideResponseDto[]>("/api/Rides");

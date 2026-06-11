@@ -19,6 +19,7 @@ export function usePassengerRideRequests() {
   const loadRequests = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setActionError(null);
 
     try {
       const response =

@@ -56,12 +56,24 @@ export function useProfile() {
     const name = apiData?.name || user?.name || "Usuário Kombinado";
     const firstName = name.trim().split(/\s+/)[0] || "Usuário";
 
+    const rawWhatsApp = apiData?.whatsApp || "WhatsApp não cadastrado";
+    let formattedWhatsApp = rawWhatsApp;
+    
+    if (rawWhatsApp !== "WhatsApp não cadastrado") {
+      const digits = rawWhatsApp.replace(/\D/g, "");
+      if (digits.length > 7) {
+        formattedWhatsApp = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      } else if (digits.length > 2) {
+        formattedWhatsApp = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      }
+    }
+
     return {
       name,
       firstName,
       email: apiData?.email || user?.email || "Email não encontrado",
       course: apiData?.course || "Curso não informado",
-      whatsApp: apiData?.whatsApp || "WhatsApp não cadastrado",
+      whatsApp: formattedWhatsApp,
       isDriver: apiData?.isDriver ?? user?.isDriver ?? false,
       vehicleModel: apiData?.vehicleModel || null,
       vehicleColor: apiData?.vehicleColor || null,
