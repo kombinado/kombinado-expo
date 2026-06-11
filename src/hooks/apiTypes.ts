@@ -14,6 +14,10 @@ export interface RideResponseDto {
   totalSeats: number;
   availableSeats: number;
   status: RideStatus;
+  vehicleModel?: string;
+  vehicleColor?: string;
+  vehiclePlate?: string;
+  pendingRequestsCount?: number;
 }
 
 export interface CreateRideDto {
@@ -32,6 +36,14 @@ export interface RideFormData {
 
 export interface RideRequestResponseDto {
   id: string;
+  rideId?: string;
+  driverName?: string;
+  origin?: string;
+  destination?: string;
+  departureTime?: string;
+  vehicleModel?: string;
+  vehicleColor?: string;
+  vehiclePlate?: string;
   passengerName: string | null;
   status: RideRequestStatus;
   meetingPointSuggestion: string | null;
