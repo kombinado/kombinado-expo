@@ -1,7 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
 import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
+import { useAuth } from "@/src/hooks/useAuth";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -11,6 +12,8 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -21,6 +24,7 @@ export default function SignUp() {
   const [whatsApp, setWhatsApp] = useState("");
   const [course, setCourse] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Campos exclusivos do motorista
   const [vehicleModel, setVehicleModel] = useState("");
@@ -32,27 +36,44 @@ export default function SignUp() {
 
   const { signUp } = useAuth();
 
+  const formatWhatsApp = (text: string) => {
+    const digits = text.replace(/\D/g, "");
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+  };
+
+  const handleWhatsAppChange = (text: string) => {
+    setWhatsApp(formatWhatsApp(text));
+  };
+
   const handleSignup = async () => {
     // Validações básicas obrigatórias
     if (!name || !email || !whatsApp || !course || !password) {
-      setErrorMessage("Por favor, preencha todos os campos obrigatórios!");
+      const msg = "Por favor, preencha todos os campos obrigatórios!";
+      setErrorMessage(msg);
+      Alert.alert("Atenção", msg);
       return;
     }
 
     // Validações adicionais para motorista
     if (isDriver && (!vehicleModel || !vehicleColor || !vehiclePlate)) {
-      setErrorMessage("Por favor, preencha todas as informações do veículo!");
+      const msg = "Por favor, preencha todas as informações do veículo!";
+      setErrorMessage(msg);
+      Alert.alert("Atenção", msg);
       return;
     }
 
     setErrorMessage("");
     setIsSubmitting(true);
 
+    const unmaskedWhatsApp = whatsApp.replace(/\D/g, "");
+
     const payload = {
       name,
       email,
       password,
-      whatsApp,
+      whatsApp: unmaskedWhatsApp,
       course,
       isDriver,
       ...(isDriver
@@ -72,22 +93,28 @@ export default function SignUp() {
         params: { successSignup: "true" },
       });
     } catch (err: any) {
-      setErrorMessage(
-        err.message ||
-          "Erro ao realizar cadastro. Verifique os dados inseridos.",
-      );
+      const msg = err.message || "Erro ao realizar cadastro. Verifique os dados inseridos.";
+      setErrorMessage(msg);
+      Alert.alert("Ops!", msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputClassName = "w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg";
+
   return (
     <AuthScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
-        <KeyboardAvoidingView behavior="padding" className="flex-1 px-8 py-4">
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : undefined} 
+          className="flex-1 px-8 py-4"
+        >
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ rowGap: 24, paddingBottom: 40 }}
+            bounces={false}
+            overScrollMode="never"
           >
             <View className="items-center mt-2">
               <Image
@@ -152,11 +179,11 @@ export default function SignUp() {
               {/* Campos Gerais */}
               <View className="flex-col gap-y-4">
                 <TextInput
-                  className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                  className={inputClassName}
                   placeholder="Nome Completo"
                   value={name}
                   onChangeText={setName}
-                  placeholderTextColor="#FAF9F9"
+                  placeholderTextColor="#A1A1AA"
                   keyboardType="default"
                   autoCapitalize="words"
                   editable={!isSubmitting}
@@ -165,11 +192,11 @@ export default function SignUp() {
                 />
 
                 <TextInput
-                  className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                  className={inputClassName}
                   placeholder="Email institucional"
                   value={email}
                   onChangeText={setEmail}
-                  placeholderTextColor="#FAF9F9"
+                  placeholderTextColor="#A1A1AA"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   editable={!isSubmitting}
@@ -178,11 +205,11 @@ export default function SignUp() {
                 />
 
                 <TextInput
-                  className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                  className={inputClassName}
                   placeholder="WhatsApp (com DDD)"
                   value={whatsApp}
-                  onChangeText={setWhatsApp}
-                  placeholderTextColor="#FAF9F9"
+                  onChangeText={handleWhatsAppChange}
+                  placeholderTextColor="#A1A1AA"
                   keyboardType="phone-pad"
                   autoCapitalize="none"
                   editable={!isSubmitting}
@@ -191,11 +218,11 @@ export default function SignUp() {
                 />
 
                 <TextInput
-                  className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                  className={inputClassName}
                   placeholder="Curso"
                   value={course}
                   onChangeText={setCourse}
-                  placeholderTextColor="#FAF9F9"
+                  placeholderTextColor="#A1A1AA"
                   keyboardType="default"
                   autoCapitalize="words"
                   editable={!isSubmitting}
@@ -203,18 +230,31 @@ export default function SignUp() {
                   accessibilityLabel="Campo de Curso"
                 />
 
-                <TextInput
-                  className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
-                  placeholder="Senha"
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholderTextColor="#FAF9F9"
-                  secureTextEntry={true}
-                  autoCapitalize="none"
-                  editable={!isSubmitting}
-                  accessible={true}
-                  accessibilityLabel="Campo de Senha"
-                />
+                <View className="relative w-full justify-center">
+                  <TextInput
+                    className={inputClassName + " pr-12"}
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholderTextColor="#A1A1AA"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    editable={!isSubmitting}
+                    accessible={true}
+                    accessibilityLabel="Campo de Senha"
+                  />
+                  <Pressable
+                    className="absolute right-4 z-10"
+                    onPress={() => setShowPassword(!showPassword)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={24} color="#A1A1AA" />
+                    ) : (
+                      <Eye size={24} color="#A1A1AA" />
+                    )}
+                  </Pressable>
+                </View>
               </View>
 
               {/* Se for motorista, exibe os campos do veículo */}
@@ -225,11 +265,11 @@ export default function SignUp() {
                   </Text>
 
                   <TextInput
-                    className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                    className={inputClassName}
                     placeholder="Modelo do Veículo"
                     value={vehicleModel}
                     onChangeText={setVehicleModel}
-                    placeholderTextColor="#FAF9F9"
+                    placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="words"
                     editable={!isSubmitting}
@@ -238,11 +278,11 @@ export default function SignUp() {
                   />
 
                   <TextInput
-                    className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                    className={inputClassName}
                     placeholder="Cor"
                     value={vehicleColor}
                     onChangeText={setVehicleColor}
-                    placeholderTextColor="#FAF9F9"
+                    placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="words"
                     editable={!isSubmitting}
@@ -251,11 +291,11 @@ export default function SignUp() {
                   />
 
                   <TextInput
-                    className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                    className={inputClassName}
                     placeholder="Placa"
                     value={vehiclePlate}
                     onChangeText={setVehiclePlate}
-                    placeholderTextColor="#FAF9F9"
+                    placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="characters"
                     editable={!isSubmitting}

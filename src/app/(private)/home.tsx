@@ -4,25 +4,95 @@ import { SearchBar } from "@/src/components/feature/SearchBar";
 import { SuggestStopModal } from "@/src/components/feature/SuggestStopModal";
 import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
 import { ToggleButton } from "@/src/components/ui/ToggleButton";
+import {
+  formatRideDate,
+  formatRideTime,
+  toRequestedRideCardStatus,
+} from "@/src/hooks/apiTypes";
+import { useAvailableRides } from "@/src/hooks/useAvailableRides";
+import { usePassengerRideRequests } from "@/src/hooks/usePassengerRideRequests";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Alert, Linking, Text, View, RefreshControl } from "react-native";
 
 export default function Home() {
-  const [isToRequest, setisToRequest] = useState(false);
+  const [isToRequest, setIsToRequest] = useState(true);
   const [destiny, setDestiny] = useState("");
-
-  // Estado para controlar a visibilidade do modal
+  const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
   const [isSuggestModalVisible, setIsSuggestModalVisible] = useState(false);
 
-  // Função que recebe a string digitada no modal
-  const handleSuggestStop = (suggestion: string) => {
-    console.log("O passageiro sugeriu a parada:", suggestion);
-    // Aqui você enviará a sugestão para a sua API
-    // api.post(`/rides/suggest-stop/${rideId}`, { stop: suggestion });
+  const {
+    filteredRides,
+    isLoading: isLoadingRides,
+    error: ridesError,
+    requestRide,
+    requestingRideId,
+    requestError,
+    refetch: refetchRides,
+  } = useAvailableRides(destiny);
+
+  const {
+    requests,
+    isLoading: isLoadingRequests,
+    error: requestsError,
+    actionError: requestActionError,
+    cancelRequest,
+    cancelingRequestId,
+    refetch: refetchRequests,
+  } = usePassengerRideRequests();
+
+  const openRequestModal = (rideId: string) => {
+    setSelectedRideId(rideId);
+    setIsSuggestModalVisible(true);
   };
 
+  const handleRequestRide = async (suggestion: string) => {
+    if (!selectedRideId) return;
+
+    const request = await requestRide(selectedRideId, suggestion);
+    setSelectedRideId(null);
+
+    if (request) {
+      await refetchRequests();
+      setIsToRequest(false);
+    }
+  };
+
+  const handleWhatsAppPress = async (phoneNumber: string | null) => {
+    if (!phoneNumber) {
+      Alert.alert(
+        "WhatsApp indisponível",
+        "O telefone do motorista só é liberado quando a solicitação é aceita.",
+      );
+      return;
+    }
+
+    const digits = phoneNumber.replace(/\D/g, "");
+    await Linking.openURL(`https://wa.me/+55${digits}`);
+  };
+
+  const handleRefresh = () => {
+    refetchRides();
+    refetchRequests();
+  };
+
+  // Filtra as caronas para ocultar aquelas nas quais o usuário já foi aceito
+  const feedRides = filteredRides.filter((ride) => {
+    return !requests.some(
+      (req) => req.rideId === ride.id && req.status === "Aceita"
+    );
+  });
+
   return (
-    <ScreenWrapper>
+    <ScreenWrapper
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoadingRides || isLoadingRequests}
+          onRefresh={handleRefresh}
+          colors={["#E84855"]}
+          tintColor="#E84855"
+        />
+      }
+    >
       <View className="mb-10">
         <Text className="text-2xl font-bold">Caronas Disponíveis</Text>
       </View>
@@ -30,13 +100,21 @@ export default function Home() {
       <View className="mb-10">
         <ToggleButton
           value={isToRequest}
-          onToggle={setisToRequest}
+          onToggle={setIsToRequest}
           labelLeft="Solicitar"
           labelRight="Solicitadas"
         />
       </View>
 
-      {isToRequest && (
+      {requestError || requestActionError ? (
+        <View className="bg-rose-100 border border-rose-300 p-4 rounded-xl mb-6">
+          <Text className="text-rose-700 font-bold text-center">
+            {requestError || requestActionError}
+          </Text>
+        </View>
+      ) : null}
+
+      {isToRequest ? (
         <View>
           <View className="mb-10">
             <SearchBar
@@ -46,42 +124,92 @@ export default function Home() {
             />
           </View>
 
-          <RideCard
-            driverName="Jose Macciotti"
-            carModel="Kombi"
-            carColor="Branco"
-            carPlate="NFK8B93"
-            date="27/05"
-            time="22h"
-            origin="Campus IFTM"
-            destination="Terminal Oeste"
-            availableSpots={3}
-            onRequestRide={() => console.log("Carona solicitada")}
-          />
+          {isLoadingRides ? (
+            <ActivityIndicator color="#E84855" />
+          ) : ridesError ? (
+            <View className="gap-4">
+              <Text className="text-rose-700 font-bold text-center">
+                {ridesError}
+              </Text>
+              <Text
+                className="text-[#E84855] font-black text-center"
+                onPress={() => refetchRides()}
+              >
+                Tentar novamente
+              </Text>
+            </View>
+          ) : feedRides.length === 0 ? (
+            <Text className="text-slate-500 text-center font-semibold">
+              Nenhuma carona disponível no momento.
+            </Text>
+          ) : (
+            feedRides.map((ride) => (
+              <RideCard
+                key={ride.id}
+                carModel={ride.vehicleModel}
+                carColor={ride.vehicleColor}
+                carPlate={ride.vehiclePlate}
+                date={formatRideDate(ride.departureTime)}
+                time={formatRideTime(ride.departureTime)}
+                origin={ride.origin}
+                destination={ride.destination}
+                availableSpots={ride.availableSeats}
+                isRequesting={requestingRideId === ride.id}
+                onRequestRide={() => openRequestModal(ride.id)}
+              />
+            ))
+          )}
         </View>
-      )}
-
-      {!isToRequest && (
-        <RequestedRideCard
-          driverName="Lucas Emmanuel"
-          carModel="Toyota Corolla"
-          carColor="Cinza"
-          carPlate="GSK4715"
-          date="01/06"
-          time="21h"
-          origin="Campus IFTM"
-          destination="Terminal Oeste"
-          status="pendente"
-          onCancelRequest={() => console.log("Cancelando")}
-          onSuggestStopPress={() => setIsSuggestModalVisible(true)}
-          onWhatsAppPress={() => console.log("Indo para o WhatsApp")}
-        />
+      ) : (
+        <View>
+          {isLoadingRequests ? (
+            <ActivityIndicator color="#E84855" />
+          ) : requestsError ? (
+            <View className="gap-4">
+              <Text className="text-rose-700 font-bold text-center">
+                {requestsError}
+              </Text>
+              <Text
+                className="text-[#E84855] font-black text-center"
+                onPress={() => refetchRequests()}
+              >
+                Tentar novamente
+              </Text>
+            </View>
+          ) : requests.length === 0 ? (
+            <Text className="text-slate-500 text-center font-semibold">
+              Você ainda não solicitou nenhuma carona.
+            </Text>
+          ) : (
+            requests.map((request) => (
+              <RequestedRideCard
+                key={request.id}
+                driverName={request.driverName || "Motorista"}
+                carModel={request.vehicleModel}
+                carColor={request.vehicleColor}
+                carPlate={request.vehiclePlate}
+                origin={request.origin || "Origem não disponível"}
+                destination={request.destination || "Destino não disponível"}
+                date={request.departureTime ? formatRideDate(request.departureTime) : "--/--"}
+                time={request.departureTime ? formatRideTime(request.departureTime) : "--:--"}
+                status={toRequestedRideCardStatus(request.status)}
+                canContactDriver={Boolean(request.phoneNumber)}
+                isCancelling={cancelingRequestId === request.id}
+                onCancelRequest={() => cancelRequest(request.id)}
+                onWhatsAppPress={() => handleWhatsAppPress(request.phoneNumber)}
+              />
+            ))
+          )}
+        </View>
       )}
 
       <SuggestStopModal
         isVisible={isSuggestModalVisible}
-        onClose={() => setIsSuggestModalVisible(false)}
-        onSubmit={handleSuggestStop}
+        onClose={() => {
+          setSelectedRideId(null);
+          setIsSuggestModalVisible(false);
+        }}
+        onSubmit={handleRequestRide}
       />
     </ScreenWrapper>
   );

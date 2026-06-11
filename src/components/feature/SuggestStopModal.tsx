@@ -23,11 +23,10 @@ export function SuggestStopModal({
 }: SuggestStopModalProps) {
   const [suggestion, setSuggestion] = useState("");
 
-  const handleSubmit = () => {
-    // Evita envio de texto vazio ou só com espaços
-    if (!suggestion.trim()) return;
+  const handleSubmit = (withSuggestion: boolean) => {
+    if (withSuggestion && !suggestion.trim()) return;
 
-    onSubmit(suggestion);
+    onSubmit(withSuggestion ? suggestion : "");
     setSuggestion(""); // Limpa o campo
     onClose(); // Fecha o modal
   };
@@ -66,7 +65,7 @@ export function SuggestStopModal({
             {/* Texto de Apoio (UX) */}
             <Text className="text-slate-500 text-sm mb-6 leading-relaxed">
               Descreva o local onde você gostaria de embarcar ou desembarcar. O
-              motorista será notificado e poderá aceitar sua sugestão.
+              motorista será notificado e poderá aceitar sua sugestão. Isso é opcional.
             </Text>
 
             {/* Input da Sugestão */}
@@ -87,22 +86,35 @@ export function SuggestStopModal({
               </View>
             </View>
 
-            {/* Botão Enviar */}
-            <Pressable
-              onPress={handleSubmit}
-              disabled={!suggestion.trim()}
-              className={`w-full py-4 rounded-xl items-center shadow-lg transition-all ${
-                suggestion.trim()
-                  ? "bg-[#E84855] active:bg-red-600 active:scale-95 shadow-red-900/20"
-                  : "bg-slate-300"
-              }`}
-              accessibilityRole="button"
-              accessibilityLabel="Enviar sugestão de parada"
-            >
-              <Text className="text-white text-xl font-black uppercase tracking-wider">
-                Enviar Sugestão
-              </Text>
-            </Pressable>
+            {/* Botões */}
+            <View className="flex-col gap-3">
+              <Pressable
+                onPress={() => handleSubmit(true)}
+                disabled={!suggestion.trim()}
+                className={`w-full py-4 rounded-xl items-center shadow-sm transition-all ${
+                  suggestion.trim()
+                    ? "bg-[#E84855] active:bg-red-600 active:scale-95 shadow-red-900/20"
+                    : "bg-slate-300"
+                }`}
+                accessibilityRole="button"
+                accessibilityLabel="Enviar sugestão de parada"
+              >
+                <Text className="text-white text-xl font-black uppercase tracking-wider">
+                  Enviar Sugestão
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleSubmit(false)}
+                className="w-full py-4 rounded-xl items-center border-2 border-slate-200 active:bg-slate-100 active:scale-95 transition-all"
+                accessibilityRole="button"
+                accessibilityLabel="Solicitar sem sugestão"
+              >
+                <Text className="text-slate-600 text-lg font-bold uppercase tracking-wider">
+                  Solicitar sem sugestão
+                </Text>
+              </Pressable>
+            </View>
           </Pressable>
         </Pressable>
       </KeyboardAvoidingView>

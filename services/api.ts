@@ -38,9 +38,8 @@ const processQueue = (error: any, token: string | null = null) => {
     } else {
       // Injeta o novo token no cabeçalho das requisições enfileiradas
       if (prom.config.options.headers) {
-        (prom.config.options.headers as any)[
-          "Authorization"
-        ] = `Bearer ${token}`;
+        (prom.config.options.headers as any)["Authorization"] =
+          `Bearer ${token}`;
       }
       // Re-executa a requisição original
       fetch(`${BASE_URL}${prom.config.path}`, prom.config.options)
@@ -55,7 +54,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 async function request<T = any>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
 
@@ -152,12 +151,38 @@ async function request<T = any>(
 
     // Lê a resposta como texto e tenta fazer o parse seguro para evitar quebra com erros 500 HTML
     const textResponse = await response.text();
-    let data;
+    let data: any = {};
     try {
-      data = JSON.parse(textResponse);
+      if (textResponse) {
+        data = JSON.parse(textResponse);
+      }
     } catch (parseError) {
-      console.error("[API] O servidor não retornou JSON válido:", textResponse.substring(0, 150));
-      throw new Error("Servidor indisponível ou ocorreu um erro interno. Tente novamente mais tarde.");
+      if (!response.ok) {
+        throw new Error(
+          textResponse || `Erro na requisição (Status ${response.status})`
+        );
+      }
+      console.error(
+        "[API] O servidor não retornou JSON válido:",
+        textResponse.substring(0, 150),
+      );
+    }
+
+    if (!response.ok) {
+      let errorMessage = "Ocorreu um erro ao processar a requisição.";
+
+      if (data.message) {
+        errorMessage = data.message;
+      } else if (data.errors && typeof data.errors === "object") {
+        const errorMessages = Object.values(data.errors).flat();
+        if (errorMessages.length > 0) {
+          errorMessage = errorMessages.join("\n");
+        }
+      } else if (data.title) {
+        errorMessage = data.title;
+      }
+
+      throw new Error(errorMessage);
     }
 
     return data as ApiResponse<T>;
@@ -166,7 +191,7 @@ async function request<T = any>(
     // Caso seja erro de certificado ou falta de conexão
     if (error.message && error.message.includes("Network request failed")) {
       throw new Error(
-        "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado)."
+        "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado).",
       );
     }
     throw error;

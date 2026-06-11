@@ -1,6 +1,6 @@
 import "@/global.css";
-import { useAuth } from "@/hooks/useAuth";
 import { AuthProvider } from "@/src/context/auth/AuthProvider";
+import { useAuth } from "@/src/hooks/useAuth";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";

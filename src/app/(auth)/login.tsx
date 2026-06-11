@@ -1,7 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
 import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
+import { useAuth } from "@/src/hooks/useAuth";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,12 +11,15 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,7 +28,9 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setErrorMessage("Por favor, preencha e-mail e senha!");
+      const msg = "Por favor, preencha e-mail e senha!";
+      setErrorMessage(msg);
+      Alert.alert("Atenção", msg);
       return;
     }
 
@@ -35,10 +41,9 @@ export default function Login() {
       await signIn(email, password);
       // A proteção de rotas reativa no app/_layout.tsx se encarrega de redirecionar para /home
     } catch (err: any) {
-      setErrorMessage(
-        err.message ||
-          "Erro ao tentar fazer login. Verifique suas credenciais.",
-      );
+      const msg = err.message || "Erro ao tentar fazer login. Verifique suas credenciais.";
+      setErrorMessage(msg);
+      Alert.alert("Ops!", msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -48,7 +53,7 @@ export default function Login() {
     <AuthScreenWrapper>
       <SafeAreaView className="flex-1 bg-[#E84855]">
         <KeyboardAvoidingView
-          behavior="padding"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="justify-center px-8 gap-y-12"
         >
           <View className="items-center">
@@ -60,12 +65,12 @@ export default function Login() {
           </View>
 
           {/* Formulário Acessível */}
-          <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8">
+          <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8 shadow-lg">
             <View className="gap-4">
-              <Text className="text-3xl text-wrap font-bold text-[#040F0F] ">
+              <Text className="text-3xl text-wrap font-bold text-[#040F0F]">
                 Bem-vindo à comunidade
               </Text>
-              <Text className="text-lg text-wrap text-[#040F0F] ">
+              <Text className="text-lg text-wrap text-[#040F0F]">
                 Acesse sua conta institucional para encontrar caronas e colegas.
               </Text>
             </View>
@@ -90,11 +95,11 @@ export default function Login() {
 
             <View className="flex-col gap-y-5">
               <TextInput
-                className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
+                className="w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg"
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
-                placeholderTextColor="#FAF9F9"
+                placeholderTextColor="#A1A1AA"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!isSubmitting}
@@ -103,19 +108,32 @@ export default function Login() {
                 accessibilityHint="Digite seu e-mail do IFTM para acessar o aplicativo"
               />
 
-              <TextInput
-                className="w-full bg-[#E84855] font-semibold text-white focus:text-[#040F0F] px-3 py-4 rounded-2xl focus:bg-[#FAF9F9] focus:border-2 focus:border-[#E84855] text-lg"
-                placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor="#FAF9F9"
-                secureTextEntry={true}
-                autoCapitalize="none"
-                editable={!isSubmitting}
-                accessible={true}
-                accessibilityLabel="Campo de senha"
-                accessibilityHint="Digite sua senha para acessar o aplicativo"
-              />
+              <View className="relative w-full justify-center">
+                <TextInput
+                  className="w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg pr-12"
+                  placeholder="Senha"
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholderTextColor="#A1A1AA"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  editable={!isSubmitting}
+                  accessible={true}
+                  accessibilityLabel="Campo de senha"
+                  accessibilityHint="Digite sua senha para acessar o aplicativo"
+                />
+                <Pressable
+                  className="absolute right-4 z-10"
+                  onPress={() => setShowPassword(!showPassword)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  {showPassword ? (
+                    <EyeOff size={24} color="#A1A1AA" />
+                  ) : (
+                    <Eye size={24} color="#A1A1AA" />
+                  )}
+                </Pressable>
+              </View>
             </View>
 
             {/* Botão Principal */}

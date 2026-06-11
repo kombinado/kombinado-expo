@@ -4,6 +4,7 @@ import React, { createContext, useEffect, useState } from "react";
 
 export interface UserProfile {
   name: string;
+  email?: string;
   isDriver: boolean;
 }
 
@@ -30,7 +31,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = await tokenStorage.getUserData();
         if (token && storedUser) {
           setUserToken(token);
+          // Usa os dados do storage temporariamente para evitar tela de carregamento longa
           setUser(storedUser);
+
+          try {
+            // Tenta buscar os dados mais atualizados no backend
+            // Injetamos o token manualmente pois a instância 'api' pode não ter pego a tempo
+            const response = await api.get("/api/auth/me", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.success && response.data) {
+              const updatedProfile = {
+                name: response.data.name,
+                email: response.data.email,
+                isDriver: response.data.isDriver,
+              };
+              setUser(updatedProfile);
+              await tokenStorage.saveUserData(updatedProfile);
+            }
+          } catch (fetchError) {
+            console.log(
+              "Aviso: Não foi possível sincronizar o perfil no boot:",
+              fetchError,
+            );
+            // Falha silenciosa, continua com o storedUser
+          }
         }
       } catch (e) {
         console.error("Falha ao recuperar dados do SecureStore ao iniciar:", e);
@@ -60,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await tokenStorage.saveTokens(accessToken, refreshToken);
 
         // Salva dados de perfil no SecureStore
-        const profileData = { name, isDriver };
+        const profileData = { name, email, isDriver };
         await tokenStorage.saveUserData(profileData);
 
         // Atualiza estados locais de forma atômica

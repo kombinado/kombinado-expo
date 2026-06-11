@@ -6,6 +6,7 @@ const USER_DATA_KEY = "kombinado_user_data";
 
 export interface UserData {
   name: string;
+  email?: string;
   isDriver: boolean;
 }
 

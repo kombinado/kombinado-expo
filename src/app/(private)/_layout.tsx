@@ -1,19 +1,19 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/src/components/Header";
+import { useAuth } from "@/src/hooks/useAuth";
 import { Tabs } from "expo-router";
 import { Car, House, User } from "lucide-react-native";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AppLayout() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        header: () => <Header firstName="Lucas" />,
+        header: () => <Header firstName={user?.name?.split(" ")[0] || "Motorista"} />,
 
         tabBarStyle: {
           backgroundColor: "#E84855",
@@ -38,6 +38,7 @@ export default function AppLayout() {
         options={{
           title: "Kombinado 🚌",
           tabBarLabel: "",
+          href: user?.isDriver ? '/driver' : null,
           tabBarIcon: ({ color, size, focused }) => (
             <View
               className={`p-2 rounded-full transition-all ${
