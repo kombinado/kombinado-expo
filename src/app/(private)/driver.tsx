@@ -7,7 +7,7 @@ import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
 import { useDriverRides } from "@/src/hooks/useDriverRides";
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, RefreshControl } from "react-native";
 
 export default function Driver() {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
@@ -64,7 +64,17 @@ export default function Driver() {
 
   return (
     <View className="flex-1 bg-[#FAF9F9]">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <ScrollView 
+        contentContainerStyle={{ padding: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRidesLoading}
+            onRefresh={refetchRides}
+            colors={["#E84855"]}
+            tintColor="#E84855"
+          />
+        }
+      >
         {isRidesLoading ? (
           <ActivityIndicator color="#E84855" size="large" />
         ) : ridesError ? (

@@ -1,21 +1,13 @@
-import { RequestedRideCard } from "@/src/components/feature/RequestedRideCard";
 import { RideCard } from "@/src/components/feature/RideCard";
 import { SearchBar } from "@/src/components/feature/SearchBar";
 import { SuggestStopModal } from "@/src/components/feature/SuggestStopModal";
 import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
-import { ToggleButton } from "@/src/components/ui/ToggleButton";
-import {
-  formatRideDate,
-  formatRideTime,
-  toRequestedRideCardStatus,
-} from "@/src/hooks/apiTypes";
+import { formatRideDate, formatRideTime } from "@/src/hooks/apiTypes";
 import { useAvailableRides } from "@/src/hooks/useAvailableRides";
-import { usePassengerRideRequests } from "@/src/hooks/usePassengerRideRequests";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Linking, Text, View } from "react-native";
+import { ActivityIndicator, Text, View, RefreshControl } from "react-native";
 
 export default function Home() {
-  const [isToRequest, setIsToRequest] = useState(true);
   const [destiny, setDestiny] = useState("");
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
   const [isSuggestModalVisible, setIsSuggestModalVisible] = useState(false);
@@ -30,16 +22,6 @@ export default function Home() {
     refetch: refetchRides,
   } = useAvailableRides(destiny);
 
-  const {
-    requests,
-    isLoading: isLoadingRequests,
-    error: requestsError,
-    actionError: requestActionError,
-    cancelRequest,
-    cancelingRequestId,
-    refetch: refetchRequests,
-  } = usePassengerRideRequests();
-
   const openRequestModal = (rideId: string) => {
     setSelectedRideId(rideId);
     setIsSuggestModalVisible(true);
@@ -52,125 +34,75 @@ export default function Home() {
     setSelectedRideId(null);
 
     if (request) {
-      await refetchRequests();
-      setIsToRequest(false);
+      // The ride was requested successfully
     }
-  };
-
-  const handleWhatsAppPress = async (phoneNumber: string | null) => {
-    if (!phoneNumber) {
-      Alert.alert(
-        "WhatsApp indisponível",
-        "O telefone do motorista só é liberado quando a solicitação é aceita.",
-      );
-      return;
-    }
-
-    const digits = phoneNumber.replace(/\D/g, "");
-    await Linking.openURL(`https://wa.me/+55${digits}`);
   };
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoadingRides}
+          onRefresh={refetchRides}
+          colors={["#E84855"]}
+          tintColor="#E84855"
+        />
+      }
+    >
       <View className="mb-10">
         <Text className="text-2xl font-bold">Caronas Disponíveis</Text>
       </View>
 
-      <View className="mb-10">
-        <ToggleButton
-          value={isToRequest}
-          onToggle={setIsToRequest}
-          labelLeft="Solicitar"
-          labelRight="Solicitadas"
-        />
-      </View>
-
-      {requestError || requestActionError ? (
+      {requestError ? (
         <View className="bg-rose-100 border border-rose-300 p-4 rounded-xl mb-6">
           <Text className="text-rose-700 font-bold text-center">
-            {requestError || requestActionError}
+            {requestError}
           </Text>
         </View>
       ) : null}
 
-      {isToRequest ? (
-        <View>
-          <View className="mb-10">
-            <SearchBar
-              value={destiny}
-              placeholder="Pra onde vamos?"
-              onChangeText={setDestiny}
-            />
-          </View>
+      <View>
+        <View className="mb-10">
+          <SearchBar
+            value={destiny}
+            placeholder="Pra onde vamos?"
+            onChangeText={setDestiny}
+          />
+        </View>
 
-          {isLoadingRides ? (
-            <ActivityIndicator color="#E84855" />
-          ) : ridesError ? (
-            <View className="gap-4">
-              <Text className="text-rose-700 font-bold text-center">
-                {ridesError}
-              </Text>
-              <Text
-                className="text-[#E84855] font-black text-center"
-                onPress={() => refetchRides()}
-              >
-                Tentar novamente
-              </Text>
-            </View>
-          ) : filteredRides.length === 0 ? (
-            <Text className="text-slate-500 text-center font-semibold">
-              Nenhuma carona disponível no momento.
+        {isLoadingRides ? (
+          <ActivityIndicator color="#E84855" />
+        ) : ridesError ? (
+          <View className="gap-4">
+            <Text className="text-rose-700 font-bold text-center">
+              {ridesError}
             </Text>
-          ) : (
-            filteredRides.map((ride) => (
-              <RideCard
-                key={ride.id}
-                date={formatRideDate(ride.departureTime)}
-                time={formatRideTime(ride.departureTime)}
-                origin={ride.origin}
-                destination={ride.destination}
-                availableSpots={ride.availableSeats}
-                isRequesting={requestingRideId === ride.id}
-                onRequestRide={() => openRequestModal(ride.id)}
-              />
-            ))
-          )}
-        </View>
-      ) : (
-        <View>
-          {isLoadingRequests ? (
-            <ActivityIndicator color="#E84855" />
-          ) : requestsError ? (
-            <View className="gap-4">
-              <Text className="text-rose-700 font-bold text-center">
-                {requestsError}
-              </Text>
-              <Text
-                className="text-[#E84855] font-black text-center"
-                onPress={() => refetchRequests()}
-              >
-                Tentar novamente
-              </Text>
-            </View>
-          ) : requests.length === 0 ? (
-            <Text className="text-slate-500 text-center font-semibold">
-              Você ainda não solicitou nenhuma carona.
+            <Text
+              className="text-[#E84855] font-black text-center"
+              onPress={() => refetchRides()}
+            >
+              Tentar novamente
             </Text>
-          ) : (
-            requests.map((request) => (
-              <RequestedRideCard
-                key={request.id}
-                driverName={request.passengerName || "Motorista Kombinado"}
-                status={toRequestedRideCardStatus(request.status)}
-                canContactDriver={Boolean(request.phoneNumber)}
-                isCancelling={cancelingRequestId === request.id}
-                onCancelRequest={() => cancelRequest(request.id)}
-                onWhatsAppPress={() => handleWhatsAppPress(request.phoneNumber)}
-              />
-            ))
-          )}
-        </View>
-      )}
+          </View>
+        ) : filteredRides.length === 0 ? (
+          <Text className="text-slate-500 text-center font-semibold">
+            Nenhuma carona disponível no momento.
+          </Text>
+        ) : (
+          filteredRides.map((ride) => (
+            <RideCard
+              key={ride.id}
+              date={formatRideDate(ride.departureTime)}
+              time={formatRideTime(ride.departureTime)}
+              origin={ride.origin}
+              destination={ride.destination}
+              availableSpots={ride.availableSeats}
+              isRequesting={requestingRideId === ride.id}
+              onRequestRide={() => openRequestModal(ride.id)}
+            />
+          ))
+        )}
+      </View>
 
       <SuggestStopModal
         isVisible={isSuggestModalVisible}

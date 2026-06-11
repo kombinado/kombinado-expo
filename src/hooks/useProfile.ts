@@ -1,4 +1,3 @@
-import { api } from "@/services/api";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 // Importe o seu cliente de API aqui. Exemplo:
@@ -37,8 +36,8 @@ export function useProfile() {
       try {
         // AQUI ACONTECE A MÁGICA REAL:
         // Substitua essa linha pela sua rota real da API.
-        const response = await api.get(`/users/profile`);
-        setApiData(response.data);
+        // const response = await api.get(`/users/profile`);
+        // setApiData(response.data);
 
         // --- SIMULAÇÃO DE API PARA VOCÊ TESTAR (Apague depois) ---
         await new Promise((resolve) => setTimeout(resolve, 1000));

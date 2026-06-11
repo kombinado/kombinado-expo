@@ -1,5 +1,5 @@
 import type { RideRequestResponseDto } from "@/src/hooks/apiTypes";
-import { Check, X } from "lucide-react-native";
+import { Check, X, MessageCircle } from "lucide-react-native";
 import React from "react";
 import {
   ActivityIndicator,
@@ -8,6 +8,8 @@ import {
   Pressable,
   Text,
   View,
+  Linking,
+  Alert,
 } from "react-native";
 
 export type RideRequest = RideRequestResponseDto;
@@ -33,6 +35,20 @@ export function RequestsModal({
   errorMessage,
   respondingRequestId,
 }: RequestsModalProps) {
+
+  const handleWhatsAppPress = async (phoneNumber: string | null) => {
+    if (!phoneNumber) {
+      Alert.alert(
+        "WhatsApp indisponível",
+        "O telefone do passageiro não foi fornecido.",
+      );
+      return;
+    }
+
+    const digits = phoneNumber.replace(/\D/g, "");
+    await Linking.openURL(`https://wa.me/+55${digits}`);
+  };
+
   return (
     <Modal
       visible={isVisible}
@@ -125,10 +141,16 @@ export function RequestsModal({
                             )}
                           </Pressable>
                         </View>
-                      ) : (
+                      ) : item.status === "Aceita" ? (
                         <View className="bg-green-500 px-4 py-3 rounded-xl">
                           <Text className="text-white font-black uppercase tracking-wider text-xs">
-                            Aceito
+                            Aceita
+                          </Text>
+                        </View>
+                      ) : (
+                        <View className="bg-red-500 px-4 py-3 rounded-xl">
+                          <Text className="text-white font-black uppercase tracking-wider text-xs">
+                            Recusada
                           </Text>
                         </View>
                       )}
@@ -138,6 +160,18 @@ export function RequestsModal({
                       <Text className="text-slate-500 font-medium">
                         Parada sugerida: {item.meetingPointSuggestion}
                       </Text>
+                    ) : null}
+
+                    {item.status === "Aceita" && item.phoneNumber ? (
+                      <Pressable
+                        onPress={() => handleWhatsAppPress(item.phoneNumber)}
+                        className="w-full bg-[#25D366] py-3 mt-2 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-[#20b858] active:scale-95 transition-all"
+                      >
+                        <MessageCircle size={20} color="#FFF" strokeWidth={2.5} />
+                        <Text className="text-white text-base font-black tracking-wider">
+                          Falar no WhatsApp
+                        </Text>
+                      </Pressable>
                     ) : null}
                   </View>
                 );
