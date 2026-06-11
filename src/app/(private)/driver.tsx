@@ -103,7 +103,7 @@ export default function Driver() {
               onCancelRide={() => handleCancelRide(ride.id)}
               onViewRequests={() => setSelectedRideId(ride.id)}
               isCancelling={cancelingRideId === ride.id}
-              hasPendingRequests={false} 
+              hasPendingRequests={ride.pendingRequestsCount ? ride.pendingRequestsCount > 0 : false} 
             />
           ))
         )}

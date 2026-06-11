@@ -1,3 +1,4 @@
+import { api } from "@/services/api";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 // Importe o seu cliente de API aqui. Exemplo:
@@ -34,22 +35,10 @@ export function useProfile() {
       setError(null);
 
       try {
-        // AQUI ACONTECE A MÁGICA REAL:
         // Substitua essa linha pela sua rota real da API.
-        // const response = await api.get(`/users/profile`);
-        // setApiData(response.data);
+        const response = await api.get(`/api/auth/me`);
+        setApiData(response.data);
 
-        // --- SIMULAÇÃO DE API PARA VOCÊ TESTAR (Apague depois) ---
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setApiData({
-          course: "Ciência da Computação",
-          whatsApp: "+55 34 99999-9999",
-          isDriver: true,
-          vehicleModel: "Honda Civic",
-          vehicleColor: "Branco",
-          vehiclePlate: "QOY-4581",
-        });
-        // --------------------------------------------------------
       } catch (err) {
         console.error("Erro ao buscar perfil:", err);
         setError("Não foi possível carregar os dados completos do perfil.");
