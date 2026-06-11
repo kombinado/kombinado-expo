@@ -151,16 +151,20 @@ async function request<T = any>(
 
     // Lê a resposta como texto e tenta fazer o parse seguro para evitar quebra com erros 500 HTML
     const textResponse = await response.text();
-    let data: any;
+    let data: any = {};
     try {
-      data = JSON.parse(textResponse);
+      if (textResponse) {
+        data = JSON.parse(textResponse);
+      }
     } catch (parseError) {
+      if (!response.ok) {
+        throw new Error(
+          textResponse || `Erro na requisição (Status ${response.status})`
+        );
+      }
       console.error(
         "[API] O servidor não retornou JSON válido:",
         textResponse.substring(0, 150),
-      );
-      throw new Error(
-        "Servidor indisponível ou ocorreu um erro interno. Tente novamente mais tarde.",
       );
     }
 
