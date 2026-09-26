@@ -50,26 +50,34 @@ O projeto adota o padrão de **Custom Hooks** para abstrair a comunicação com 
 
 Para que o aplicativo mobile consiga se comunicar com a API rodando em sua máquina, é estritamente necessário configurar as portas de rede, visto que simuladores e celulares rodam em redes diferentes da sua máquina.
 
-### Passo 1: Iniciar a API .NET liberando acesso de rede
-Por padrão, a API .NET 8 aceita apenas conexões do próprio `localhost`. Para que o emulador Android ou seu celular físico consigam acessar a API de fora, você deve instruir o `.NET` a escutar em **todas as interfaces de rede (`0.0.0.0`)**.
+### Passo 1: Subir a API (repositório `kombinado-api`)
+O app precisa acessar a API a partir de **outra rede** (o emulador ou o celular), então a API tem que escutar em todas as interfaces de rede, e não apenas no `localhost`.
 
-Abra o terminal na pasta do repositório da sua API (`kombinado-api`) e rode o comando de inicialização forçando uma **porta HTTP** (ex: `5198`):
+**Opção A — Docker Compose (recomendado):** na raiz do repositório `kombinado-api` (com o `.env` configurado conforme o README de lá), rode:
 ```bash
-dotnet run --urls "http://0.0.0.0:5198"
+docker compose up -d --build
 ```
-> **⚠️ Aviso Importante (Android):** Dê preferência a testar via porta `HTTP` não-segura localmente. O cliente nativo do Android recusa conexões `HTTPS` com certificados locais de desenvolvimento autoassinados, o que causará erros de *Network Request Failed* no aplicativo.
+Isso sobe o banco e a API, aplica as migrações automaticamente e deixa a API disponível na **porta `8080`**, já acessível pela rede.
+
+**Opção B — `dotnet run` (para depurar a API):** com o banco já rodando, entre na pasta `Kombinado.Api` e inicie a API forçando uma **porta HTTP** em todas as interfaces:
+```bash
+dotnet run --launch-profile http --urls "http://0.0.0.0:5198"
+```
+Nesse caso, use a porta **`5198`** no passo seguinte.
+
+> **⚠️ Aviso Importante (Android):** Use sempre `HTTP` localmente. O cliente nativo do Android recusa conexões `HTTPS` com certificados locais de desenvolvimento autoassinados, o que causará erros de *Network Request Failed* no aplicativo.
 
 ### Passo 2: Configurar o Endereço no Aplicativo (Arquivo `.env`)
 Na raiz deste projeto Expo, crie um arquivo chamado `.env` (ou copie e renomeie o `.env.example`).
-O endereço que você colocará dependerá de onde o app está rodando:
+O endereço depende de onde o app está rodando (os exemplos usam a porta `8080` do Docker; troque para `5198` se estiver usando a Opção B):
 
 * **Emulador Android**: Use o IP **`10.0.2.2`** (este é o gateway interno do emulador que aponta para o localhost do seu computador).
   ```env
-  EXPO_PUBLIC_API_URL=http://10.0.2.2:5198
+  EXPO_PUBLIC_API_URL=http://10.0.2.2:8080
   ```
 * **Celular Físico / Expo Go via Wi-Fi**: Use o IP real da sua máquina na rede local (ex: `192.168.X.YZ`).
   ```env
-  EXPO_PUBLIC_API_URL=http://192.168.X.YZ:5198
+  EXPO_PUBLIC_API_URL=http://192.168.X.YZ:8080
   ```
 
 ### Passo 3: Rodar o Aplicativo
