@@ -146,6 +146,7 @@ export default function Home() {
             feedRides.map((ride) => (
               <RideCard
                 key={ride.id}
+                driverName={ride.driverName}
                 carModel={ride.vehicleModel}
                 carColor={ride.vehicleColor}
                 carPlate={ride.vehiclePlate}
