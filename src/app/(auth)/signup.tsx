@@ -30,6 +30,8 @@ export default function SignUp() {
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleColor, setVehicleColor] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  // Vagas para passageiros, sem contar o motorista (a API aceita de 1 a 8)
+  const [vehicleTotalSeats, setVehicleTotalSeats] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,8 +59,16 @@ export default function SignUp() {
     }
 
     // Validações adicionais para motorista
-    if (isDriver && (!vehicleModel || !vehicleColor || !vehiclePlate)) {
+    if (isDriver && (!vehicleModel || !vehicleColor || !vehiclePlate || !vehicleTotalSeats)) {
       const msg = "Por favor, preencha todas as informações do veículo!";
+      setErrorMessage(msg);
+      Alert.alert("Atenção", msg);
+      return;
+    }
+
+    const seats = Number(vehicleTotalSeats);
+    if (isDriver && (seats < 1 || seats > 8)) {
+      const msg = "O número de vagas do veículo deve ser entre 1 e 8.";
       setErrorMessage(msg);
       Alert.alert("Atenção", msg);
       return;
@@ -81,6 +91,7 @@ export default function SignUp() {
             vehicleModel,
             vehicleColor,
             vehiclePlate,
+            vehicleTotalSeats: seats,
           }
         : {}),
     };
@@ -292,15 +303,30 @@ export default function SignUp() {
 
                   <TextInput
                     className={inputClassName}
-                    placeholder="Placa"
+                    placeholder="Placa (ABC1234 ou ABC1D23)"
                     value={vehiclePlate}
                     onChangeText={setVehiclePlate}
                     placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="characters"
+                    autoCorrect={false}
+                    maxLength={8}
                     editable={!isSubmitting}
                     accessible={true}
                     accessibilityLabel="Placa do carro"
+                  />
+
+                  <TextInput
+                    className={inputClassName}
+                    placeholder="Vagas para passageiros (1 a 8)"
+                    value={vehicleTotalSeats}
+                    onChangeText={(text) => setVehicleTotalSeats(text.replace(/\D/g, ""))}
+                    placeholderTextColor="#A1A1AA"
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    editable={!isSubmitting}
+                    accessible={true}
+                    accessibilityLabel="Vagas para passageiros no carro, de 1 a 8"
                   />
                 </View>
               )}
