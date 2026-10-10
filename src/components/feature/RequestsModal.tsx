@@ -147,14 +147,15 @@ export function RequestsModal({
                         </View>
                       ) : item.status === "Aceita" ? (
                         <View className="bg-green-500 px-4 py-3 rounded-xl">
-                          <Text className="text-white font-black uppercase tracking-wider text-xs">
-                            Aceita
+                          {/* Rótulo já em maiúsculas: no Android, a classe uppercase corta a última letra */}
+                          <Text className="text-white font-black tracking-wider text-xs">
+                            ACEITA
                           </Text>
                         </View>
                       ) : (
                         <View className="bg-red-500 px-4 py-3 rounded-xl">
-                          <Text className="text-white font-black uppercase tracking-wider text-xs">
-                            Recusada
+                          <Text className="text-white font-black tracking-wider text-xs">
+                            RECUSADA
                           </Text>
                         </View>
                       )}

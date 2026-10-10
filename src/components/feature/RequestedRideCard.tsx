@@ -40,10 +40,11 @@ export function RequestedRideCard({
   canContactDriver = false,
   isCancelling = false,
 }: RequestedRideCardProps) {
+  // Rótulos já em maiúsculas: no Android, a classe uppercase corta a última letra
   const statusConfig = {
-    aceita: { label: "Aceita", color: "text-green-600" },
-    pendente: { label: "Pendente", color: "text-amber-500" },
-    negada: { label: "Negada", color: "text-slate-400" },
+    aceita: { label: "ACEITA", color: "text-green-600" },
+    pendente: { label: "PENDENTE", color: "text-amber-500" },
+    negada: { label: "NEGADA", color: "text-slate-400" },
   };
 
   const currentStatus = statusConfig[status];
@@ -84,7 +85,7 @@ export function RequestedRideCard({
 
         <View className="bg-white px-4 py-3 rounded-xl items-center justify-center shadow-sm">
           <Text
-            className={`text-lg font-black uppercase tracking-wider ${currentStatus.color}`}
+            className={`text-lg font-black tracking-wider ${currentStatus.color}`}
           >
             {currentStatus.label}
           </Text>
