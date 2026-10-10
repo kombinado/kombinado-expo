@@ -3,6 +3,10 @@ import { RideCard } from "@/src/components/feature/RideCard";
 import { SearchBar } from "@/src/components/feature/SearchBar";
 import { SuggestStopModal } from "@/src/components/feature/SuggestStopModal";
 import { ScreenWrapper } from "@/src/components/layout/ScreenWraper";
+import { EmptyState } from "@/src/components/ui/EmptyState";
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
+import { ErrorState } from "@/src/components/ui/ErrorState";
+import { LoadingState } from "@/src/components/ui/LoadingState";
 import { ToggleButton } from "@/src/components/ui/ToggleButton";
 import {
   formatRideDate,
@@ -11,8 +15,9 @@ import {
 } from "@/src/hooks/apiTypes";
 import { useAvailableRides } from "@/src/hooks/useAvailableRides";
 import { usePassengerRideRequests } from "@/src/hooks/usePassengerRideRequests";
+import { CarFront, SearchX, Ticket } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Linking, Text, View, RefreshControl } from "react-native";
+import { Alert, Linking, Text, View, RefreshControl } from "react-native";
 
 export default function Home() {
   const [isToRequest, setIsToRequest] = useState(true);
@@ -106,13 +111,7 @@ export default function Home() {
         />
       </View>
 
-      {requestError || requestActionError ? (
-        <View className="bg-rose-100 border border-rose-300 p-4 rounded-xl mb-6">
-          <Text className="text-rose-700 font-bold text-center">
-            {requestError || requestActionError}
-          </Text>
-        </View>
-      ) : null}
+      <ErrorBanner message={requestError || requestActionError} className="mb-6" />
 
       {isToRequest ? (
         <View>
@@ -125,23 +124,23 @@ export default function Home() {
           </View>
 
           {isLoadingRides ? (
-            <ActivityIndicator color="#E84855" />
+            <LoadingState />
           ) : ridesError ? (
-            <View className="gap-4">
-              <Text className="text-rose-700 font-bold text-center">
-                {ridesError}
-              </Text>
-              <Text
-                className="text-[#E84855] font-black text-center"
-                onPress={() => refetchRides()}
-              >
-                Tentar novamente
-              </Text>
-            </View>
+            <ErrorState message={ridesError} onRetry={refetchRides} />
           ) : feedRides.length === 0 ? (
-            <Text className="text-slate-500 text-center font-semibold">
-              Nenhuma carona disponível no momento.
-            </Text>
+            destiny.trim() ? (
+              <EmptyState
+                icon={SearchX}
+                message={`Nenhuma carona encontrada para "${destiny.trim()}".`}
+                description="Tente buscar por outra origem ou destino."
+              />
+            ) : (
+              <EmptyState
+                icon={CarFront}
+                message="Nenhuma carona disponível no momento."
+                description="Puxe a tela para baixo para atualizar."
+              />
+            )
           ) : (
             feedRides.map((ride) => (
               <RideCard
@@ -164,23 +163,15 @@ export default function Home() {
       ) : (
         <View>
           {isLoadingRequests ? (
-            <ActivityIndicator color="#E84855" />
+            <LoadingState />
           ) : requestsError ? (
-            <View className="gap-4">
-              <Text className="text-rose-700 font-bold text-center">
-                {requestsError}
-              </Text>
-              <Text
-                className="text-[#E84855] font-black text-center"
-                onPress={() => refetchRequests()}
-              >
-                Tentar novamente
-              </Text>
-            </View>
+            <ErrorState message={requestsError} onRetry={refetchRequests} />
           ) : requests.length === 0 ? (
-            <Text className="text-slate-500 text-center font-semibold">
-              Você ainda não solicitou nenhuma carona.
-            </Text>
+            <EmptyState
+              icon={Ticket}
+              message="Você ainda não solicitou nenhuma carona."
+              description="As caronas que você solicitar aparecem aqui."
+            />
           ) : (
             requests.map((request) => (
               <RequestedRideCard

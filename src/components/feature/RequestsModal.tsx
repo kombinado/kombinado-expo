@@ -1,5 +1,9 @@
+import { EmptyState } from "@/src/components/ui/EmptyState";
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
+import { ErrorState } from "@/src/components/ui/ErrorState";
+import { LoadingState } from "@/src/components/ui/LoadingState";
 import type { RideRequestResponseDto } from "@/src/hooks/apiTypes";
-import { Check, X, MessageCircle } from "lucide-react-native";
+import { Check, Inbox, X, MessageCircle } from "lucide-react-native";
 import React from "react";
 import {
   ActivityIndicator,
@@ -21,6 +25,10 @@ export interface RequestsModalProps {
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   isLoading?: boolean;
+  // Erro ao carregar a lista (substitui a lista, com botão de tentar novamente)
+  loadErrorMessage?: string | null;
+  onRetry?: () => void;
+  // Erro ao aceitar ou recusar (aparece acima da lista)
   errorMessage?: string | null;
   respondingRequestId?: string | null;
 }
@@ -32,6 +40,8 @@ export function RequestsModal({
   onAccept,
   onReject,
   isLoading = false,
+  loadErrorMessage,
+  onRetry,
   errorMessage,
   respondingRequestId,
 }: RequestsModalProps) {
@@ -73,24 +83,18 @@ export function RequestsModal({
             </Pressable>
           </View>
 
-          {errorMessage ? (
-            <View className="bg-rose-100 border border-rose-300 p-3 rounded-xl mb-4">
-              <Text className="text-rose-700 text-sm font-bold text-center">
-                {errorMessage}
-              </Text>
-            </View>
-          ) : null}
+          <ErrorBanner message={errorMessage} className="mb-4" />
 
           {isLoading ? (
-            <View className="py-10 items-center justify-center">
-              <ActivityIndicator color="#E84855" />
-            </View>
+            <LoadingState />
+          ) : loadErrorMessage ? (
+            <ErrorState message={loadErrorMessage} onRetry={onRetry} />
           ) : requests.length === 0 ? (
-            <View className="py-10 items-center justify-center">
-              <Text className="text-slate-400 text-lg font-medium text-center">
-                Nenhuma solicitação no momento.
-              </Text>
-            </View>
+            <EmptyState
+              icon={Inbox}
+              message="Nenhuma solicitação no momento."
+              description="Quando um passageiro pedir uma vaga, ele aparece aqui."
+            />
           ) : (
             <FlatList
               data={requests}

@@ -43,6 +43,7 @@ export function useDriverRides() {
   const loadRides = useCallback(() => {
     setIsLoading(true);
     setError(null);
+    setActionError(null);
     return fetchRides();
   }, [fetchRides]);
 

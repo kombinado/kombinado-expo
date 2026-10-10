@@ -1,3 +1,4 @@
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
 import type { RideFormData } from "@/src/hooks/apiTypes";
 import { Clock, LocateFixed, MapPin, Users, X } from "lucide-react-native";
 import React, { useState } from "react";
@@ -122,13 +123,7 @@ export function CreateRideModal({
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="gap-4 pb-4">
-                {errorMessage ? (
-                  <View className="bg-rose-100 border border-rose-300 p-3 rounded-xl">
-                    <Text className="text-rose-700 text-sm font-bold text-center">
-                      {errorMessage}
-                    </Text>
-                  </View>
-                ) : null}
+                <ErrorBanner message={errorMessage} />
 
                 <View>
                   <Text className="text-slate-500 font-bold mb-1 ml-1">

@@ -19,7 +19,11 @@ export function useDriverRideRequests(rideId: string | null) {
   const [respondingRequestId, setRespondingRequestId] = useState<string | null>(
     null,
   );
-  const [actionError, setActionError] = useState<string | null>(null);
+  // Erro ao responder, guardado com a carona em que aconteceu
+  const [actionError, setActionError] = useState<{
+    rideId: string | null;
+    message: string;
+  } | null>(null);
 
   // Busca as solicitações de uma carona e só altera o estado depois da resposta.
   // isCurrent descarta a resposta de uma carona que já foi fechada ou trocada.
@@ -92,13 +96,13 @@ export function useDriverRideRequests(rideId: string | null) {
           err,
           "Não foi possível responder a solicitação.",
         );
-        setActionError(message);
+        setActionError({ rideId, message });
         return false;
       } finally {
         setRespondingRequestId(null);
       }
     },
-    [loadRequests],
+    [rideId, loadRequests],
   );
 
   useEffect(() => {
@@ -120,7 +124,7 @@ export function useDriverRideRequests(rideId: string | null) {
     requests: isOpenRideLoaded ? requests : [],
     isLoading: isRefetching || (rideId !== null && !isOpenRideLoaded),
     error: isOpenRideLoaded ? error : null,
-    actionError,
+    actionError: actionError?.rideId === rideId ? actionError.message : null,
     respondToRequest,
     respondingRequestId,
     refetch: loadRequests,
