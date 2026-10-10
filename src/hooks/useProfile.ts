@@ -14,6 +14,8 @@ export interface AppProfile {
   vehicleModel: string | null;
   vehicleColor: string | null;
   vehiclePlate: string | null;
+  // Vagas para passageiros (1 a 8). Nulo para passageiros e motoristas cadastrados antes do campo existir
+  vehicleTotalSeats: number | null;
 }
 
 export function useProfile() {
@@ -78,6 +80,7 @@ export function useProfile() {
       vehicleModel: apiData?.vehicleModel || null,
       vehicleColor: apiData?.vehicleColor || null,
       vehiclePlate: apiData?.vehiclePlate || null,
+      vehicleTotalSeats: apiData?.vehicleTotalSeats ?? null,
     };
   }, [user, apiData]);
 

@@ -9,6 +9,7 @@ import {
 import { useCreateRide } from "@/src/hooks/useCreateRide";
 import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
 import { useDriverRides } from "@/src/hooks/useDriverRides";
+import { useProfile } from "@/src/hooks/useProfile";
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, RefreshControl } from "react-native";
@@ -23,6 +24,7 @@ export default function Driver() {
     error: createError,
     clearError: clearCreateError,
   } = useCreateRide();
+  const { profile } = useProfile();
   const {
     activeRides,
     isLoading: isRidesLoading,
@@ -156,6 +158,8 @@ export default function Driver() {
         onSubmit={handleCreateRide}
         isSubmitting={isCreatingRide}
         errorMessage={createError}
+        // Sem capacidade cadastrada (motoristas antigos), o modal usa o limite da API (8)
+        maxSeats={profile.vehicleTotalSeats ?? undefined}
       />
     </View>
   );

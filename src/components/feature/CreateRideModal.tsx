@@ -21,7 +21,12 @@ export interface CreateRideModalProps {
   onSubmit: (data: RideFormData) => boolean | void | Promise<boolean | void>;
   isSubmitting?: boolean;
   errorMessage?: string | null;
+  // Capacidade do veículo do motorista; a API aceita no máximo 8 vagas por carona
+  maxSeats?: number;
 }
+
+const MIN_SEATS = 1;
+const MAX_SEATS = 8;
 
 export function CreateRideModal({
   isVisible,
@@ -29,6 +34,7 @@ export function CreateRideModal({
   onSubmit,
   isSubmitting = false,
   errorMessage,
+  maxSeats = MAX_SEATS,
 }: CreateRideModalProps) {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -54,14 +60,22 @@ export function CreateRideModal({
     }
   };
 
+  const seatsLimit = Math.min(maxSeats, MAX_SEATS);
+  const spotsNumber = parseInt(spots, 10);
+  const isSpotsValid = spotsNumber >= MIN_SEATS && spotsNumber <= seatsLimit;
+
+  const handleSpotsChange = (text: string) => {
+    setSpots(text.replace(/\D/g, ""));
+  };
+
   const handleCreate = async () => {
-    if (!origin || !destination || !time || !spots || isSubmitting) return;
+    if (!origin || !destination || !time || !isSpotsValid || isSubmitting) return;
 
     const shouldClose = await onSubmit({
       origin,
       destination,
       time,
-      spots: parseInt(spots, 10),
+      spots: spotsNumber,
     });
 
     if (shouldClose === false) return;
@@ -76,7 +90,7 @@ export function CreateRideModal({
     onClose();
   };
 
-  const canSubmit = Boolean(origin && destination && time && spots) && !isSubmitting;
+  const canSubmit = Boolean(origin && destination && time) && isSpotsValid && !isSubmitting;
 
   return (
     <Modal
@@ -178,7 +192,7 @@ export function CreateRideModal({
                       <Users size={20} color="#94a3b8" />
                       <TextInput
                         value={spots}
-                        onChangeText={setSpots}
+                        onChangeText={handleSpotsChange}
                         placeholder="Ex: 4"
                         keyboardType="number-pad"
                         maxLength={1}
@@ -187,6 +201,11 @@ export function CreateRideModal({
                         editable={!isSubmitting}
                       />
                     </View>
+                    <Text
+                      className={`text-xs font-semibold mt-1 ml-1 ${spots && !isSpotsValid ? "text-rose-600" : "text-slate-400"}`}
+                    >
+                      De {MIN_SEATS} a {seatsLimit} vagas
+                    </Text>
                   </View>
                 </View>
               </View>
