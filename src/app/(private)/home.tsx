@@ -80,10 +80,11 @@ export default function Home() {
     refetchRequests();
   };
 
-  // Filtra as caronas para ocultar aquelas nas quais o usuário já foi aceito
+  // Oculta as caronas que o usuário já solicitou (pendente, aceita ou recusada), pois a API
+  // recusa uma nova solicitação nesses casos. Só uma solicitação cancelada libera a carona de novo.
   const feedRides = filteredRides.filter((ride) => {
     return !requests.some(
-      (req) => req.rideId === ride.id && req.status === "Aceita"
+      (req) => req.rideId === ride.id && req.status !== "Cancelada"
     );
   });
 
