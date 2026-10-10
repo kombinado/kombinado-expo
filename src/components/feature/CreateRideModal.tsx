@@ -70,6 +70,12 @@ export function CreateRideModal({
     onClose();
   };
 
+  // Enquanto a carona é enviada, o modal não pode ser fechado
+  const handleClose = () => {
+    if (isSubmitting) return;
+    onClose();
+  };
+
   const canSubmit = Boolean(origin && destination && time && spots) && !isSubmitting;
 
   return (
@@ -77,13 +83,13 @@ export function CreateRideModal({
       visible={isVisible}
       transparent={true}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <Pressable className="flex-1 justify-end bg-black/50" onPress={onClose}>
+        <Pressable className="flex-1 justify-end bg-black/50" onPress={handleClose}>
           <Pressable
             className="bg-white rounded-t-[32px] p-6 max-h-[90%]"
             onPress={(event) => event.stopPropagation()}
@@ -93,7 +99,7 @@ export function CreateRideModal({
                 Criar Carona
               </Text>
               <Pressable
-                onPress={onClose}
+                onPress={handleClose}
                 className="bg-slate-100 p-2 rounded-full active:bg-slate-200"
               >
                 <X size={24} color="#64748b" strokeWidth={2.5} />
