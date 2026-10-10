@@ -62,12 +62,9 @@ export function usePassengerRideRequests() {
           "Não foi possível cancelar a solicitação.",
         );
 
+        // A API não lista solicitações canceladas, então ela sai da lista (e a carona volta ao feed)
         setRequests((current) =>
-          current.map((request) =>
-            request.id === requestId
-              ? { ...request, status: "Cancelada" }
-              : request,
-          ),
+          current.filter((request) => request.id !== requestId),
         );
         return true;
       } catch (err) {

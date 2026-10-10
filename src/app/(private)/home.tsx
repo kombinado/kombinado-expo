@@ -75,6 +75,14 @@ export default function Home() {
     await Linking.openURL(`https://wa.me/+55${digits}`);
   };
 
+  // Depois de cancelar, recarrega o feed: a carona volta com as vagas atualizadas
+  const handleCancelRequest = async (requestId: string) => {
+    const success = await cancelRequest(requestId);
+    if (success) {
+      refetchRides();
+    }
+  };
+
   const handleRefresh = () => {
     refetchRides();
     refetchRequests();
@@ -188,7 +196,7 @@ export default function Home() {
                 status={toRequestedRideCardStatus(request.status)}
                 canContactDriver={Boolean(request.phoneNumber)}
                 isCancelling={cancelingRequestId === request.id}
-                onCancelRequest={() => cancelRequest(request.id)}
+                onCancelRequest={() => handleCancelRequest(request.id)}
                 onWhatsAppPress={() => handleWhatsAppPress(request.phoneNumber)}
               />
             ))
