@@ -301,33 +301,44 @@ export default function SignUp() {
                     accessibilityLabel="Cor do carro"
                   />
 
-                  <TextInput
-                    className={inputClassName}
-                    placeholder="Placa (ABC1234 ou ABC1D23)"
-                    value={vehiclePlate}
-                    onChangeText={setVehiclePlate}
-                    placeholderTextColor="#A1A1AA"
-                    keyboardType="default"
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                    maxLength={8}
-                    editable={!isSubmitting}
-                    accessible={true}
-                    accessibilityLabel="Placa do carro"
-                  />
+                  {/* Placeholders curtos para não cortar; as regras ficam no texto de ajuda abaixo */}
+                  <View>
+                    <TextInput
+                      className={inputClassName}
+                      placeholder="Placa"
+                      value={vehiclePlate}
+                      onChangeText={setVehiclePlate}
+                      placeholderTextColor="#A1A1AA"
+                      keyboardType="default"
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      maxLength={8}
+                      editable={!isSubmitting}
+                      accessible={true}
+                      accessibilityLabel="Placa do carro, no formato ABC1234 ou ABC1D23"
+                    />
+                    <Text className="text-xs font-semibold text-slate-400 mt-1 ml-1">
+                      Formato ABC1234 ou ABC1D23
+                    </Text>
+                  </View>
 
-                  <TextInput
-                    className={inputClassName}
-                    placeholder="Vagas para passageiros (1 a 8)"
-                    value={vehicleTotalSeats}
-                    onChangeText={(text) => setVehicleTotalSeats(text.replace(/\D/g, ""))}
-                    placeholderTextColor="#A1A1AA"
-                    keyboardType="number-pad"
-                    maxLength={1}
-                    editable={!isSubmitting}
-                    accessible={true}
-                    accessibilityLabel="Vagas para passageiros no carro, de 1 a 8"
-                  />
+                  <View>
+                    <TextInput
+                      className={inputClassName}
+                      placeholder="Vagas no carro"
+                      value={vehicleTotalSeats}
+                      onChangeText={(text) => setVehicleTotalSeats(text.replace(/\D/g, ""))}
+                      placeholderTextColor="#A1A1AA"
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      editable={!isSubmitting}
+                      accessible={true}
+                      accessibilityLabel="Vagas para passageiros no carro, de 1 a 8"
+                    />
+                    <Text className="text-xs font-semibold text-slate-400 mt-1 ml-1">
+                      De 1 a 8 passageiros, sem contar você
+                    </Text>
+                  </View>
                 </View>
               )}
 
