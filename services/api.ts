@@ -154,7 +154,8 @@ async function request<T = any>(
         try {
           newAccessToken = await refreshTokens();
         } catch (refreshErr) {
-          console.error("[API] Falha ao atualizar token:", refreshErr);
+          // Erros esperados vão para console.log: console.warn/error abrem alertas do LogBox no app
+          console.log("[API] Aviso: falha de rede ao atualizar token:", refreshErr);
           const friendlyError = toFriendlyError(refreshErr);
           processQueue(friendlyError);
           throw friendlyError;
@@ -169,7 +170,7 @@ async function request<T = any>(
         return await request<T>(path, options, true);
       }
 
-      console.warn("[API] Sessão expirada de vez. Deslogando usuário...");
+      console.log("[API] Sessão expirada de vez. Deslogando usuário...");
       const sessionError = new Error(SESSION_EXPIRED_MESSAGE);
       processQueue(sessionError);
 
