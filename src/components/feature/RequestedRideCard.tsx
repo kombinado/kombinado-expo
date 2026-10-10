@@ -41,9 +41,9 @@ export function RequestedRideCard({
   isCancelling = false,
 }: RequestedRideCardProps) {
   const statusConfig = {
-    aceita: { label: "Aceita", color: "text-green-600" },
-    pendente: { label: "Pendente", color: "text-amber-500" },
-    negada: { label: "Negada", color: "text-slate-400" },
+    aceita: { label: "ACEITA", color: "text-green-600" },
+    pendente: { label: "PENDENTE", color: "text-amber-500" },
+    negada: { label: "NEGADA", color: "text-slate-400" },
   };
 
   const currentStatus = statusConfig[status];
@@ -82,9 +82,11 @@ export function RequestedRideCard({
           ) : null}
         </View>
 
-        <View className="bg-white px-4 py-3 rounded-xl items-center justify-center shadow-sm">
+        {/* No Android, textos em negrito com letterSpacing podem ter a última letra cortada.
+            A largura mínima e o texto esticado e centralizado deixam uma folga depois da palavra. */}
+        <View className="bg-white px-4 py-3 rounded-xl justify-center shadow-sm min-w-[120px]">
           <Text
-            className={`text-lg font-black uppercase tracking-wider ${currentStatus.color}`}
+            className={`self-stretch text-center text-lg font-black ${currentStatus.color}`}
           >
             {currentStatus.label}
           </Text>

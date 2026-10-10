@@ -33,7 +33,7 @@ export function useCreateRide(options: UseCreateRideOptions = {}) {
       await options.onSuccess?.(ride);
       return true;
     } catch (err) {
-      console.error("Erro ao criar carona:", err);
+      console.log("Aviso ao criar carona:", err);
       setError(
         getErrorMessage(
           err,
