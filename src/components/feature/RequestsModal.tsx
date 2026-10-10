@@ -146,15 +146,15 @@ export function RequestsModal({
                           </Pressable>
                         </View>
                       ) : item.status === "Aceita" ? (
-                        <View className="bg-green-500 px-4 py-3 rounded-xl">
-                          {/* Rótulo já em maiúsculas: no Android, a classe uppercase corta a última letra */}
-                          <Text className="text-white font-black tracking-wider text-xs">
+                        // Largura mínima e texto centralizado: evita o corte da última letra no Android
+                        <View className="bg-green-500 px-4 py-3 rounded-xl min-w-[96px]">
+                          <Text className="text-center text-white font-black text-xs">
                             ACEITA
                           </Text>
                         </View>
                       ) : (
-                        <View className="bg-red-500 px-4 py-3 rounded-xl">
-                          <Text className="text-white font-black tracking-wider text-xs">
+                        <View className="bg-red-500 px-4 py-3 rounded-xl min-w-[96px]">
+                          <Text className="text-center text-white font-black text-xs">
                             RECUSADA
                           </Text>
                         </View>

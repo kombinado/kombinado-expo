@@ -40,7 +40,6 @@ export function RequestedRideCard({
   canContactDriver = false,
   isCancelling = false,
 }: RequestedRideCardProps) {
-  // Rótulos já em maiúsculas: no Android, a classe uppercase corta a última letra
   const statusConfig = {
     aceita: { label: "ACEITA", color: "text-green-600" },
     pendente: { label: "PENDENTE", color: "text-amber-500" },
@@ -83,9 +82,11 @@ export function RequestedRideCard({
           ) : null}
         </View>
 
-        <View className="bg-white px-4 py-3 rounded-xl items-center justify-center shadow-sm">
+        {/* No Android, textos em negrito com letterSpacing podem ter a última letra cortada.
+            A largura mínima e o texto esticado e centralizado deixam uma folga depois da palavra. */}
+        <View className="bg-white px-4 py-3 rounded-xl justify-center shadow-sm min-w-[120px]">
           <Text
-            className={`text-lg font-black tracking-wider ${currentStatus.color}`}
+            className={`self-stretch text-center text-lg font-black ${currentStatus.color}`}
           >
             {currentStatus.label}
           </Text>
