@@ -21,6 +21,20 @@ export interface RideResponseDto {
   pendingRequestsCount?: number;
 }
 
+// Resposta de GET /api/auth/me
+export interface UserProfileResponseDto {
+  id: string;
+  name: string;
+  email: string;
+  course: string;
+  whatsApp: string;
+  isDriver: boolean;
+  vehicleModel: string | null;
+  vehicleColor: string | null;
+  vehiclePlate: string | null;
+  vehicleTotalSeats: number | null;
+}
+
 export interface CreateRideDto {
   origin: string;
   destination: string;

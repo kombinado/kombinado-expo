@@ -1,8 +1,11 @@
 import { api } from "@/services/api";
+import {
+  ensureApiSuccess,
+  getErrorMessage,
+} from "@/src/hooks/apiHookUtils";
+import type { UserProfileResponseDto } from "@/src/hooks/apiTypes";
 import { useAuth } from "@/src/hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
-// Importe o seu cliente de API aqui. Exemplo:
-// import { api } from "@/src/services/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface AppProfile {
   name: string;
@@ -18,41 +21,51 @@ export interface AppProfile {
   vehicleTotalSeats: number | null;
 }
 
+const PROFILE_ERROR_MESSAGE = "Não foi possível carregar os dados do seu perfil.";
+
 export function useProfile() {
   // 1. Pegamos os dados do Auth
   const { user, signOut, isLoading: isAuthLoading } = useAuth();
 
-  // 2. Novos estados para gerenciar a chamada da API
-  const [apiData, setApiData] = useState<Partial<AppProfile> | null>(null);
-  const [isFetchingProfile, setIsFetchingProfile] = useState(false);
+  // 2. Estados da chamada à API
+  const [apiData, setApiData] = useState<UserProfileResponseDto | null>(null);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 3. O Efeito: Dispara a busca assim que descobrirmos quem é o usuário logado
+  // Busca o perfil e só altera o estado depois da resposta, por isso pode rodar direto no useEffect
+  const fetchProfile = useCallback(async () => {
+    try {
+      const response = await api.get<UserProfileResponseDto>("/api/auth/me");
+      const data = ensureApiSuccess(response, PROFILE_ERROR_MESSAGE);
+      setApiData(data);
+      setError(null);
+      return data;
+    } catch (err) {
+      console.log("Aviso ao buscar perfil:", err);
+      setError(getErrorMessage(err, PROFILE_ERROR_MESSAGE));
+      return null;
+    } finally {
+      setIsFetchingProfile(false);
+    }
+  }, []);
+
+  // Recarrega mostrando o carregamento (pull-to-refresh e "Tentar novamente")
+  const refetch = useCallback(() => {
+    setIsFetchingProfile(true);
+    setError(null);
+    return fetchProfile();
+  }, [fetchProfile]);
+
+  // 3. Busca o perfil assim que descobrirmos quem é o usuário logado
   useEffect(() => {
-    // Se não tiver usuário logado (ou se ainda estiver carregando o Auth), não faz a chamada
     if (!user?.email) return;
 
-    const fetchProfileData = async () => {
-      setIsFetchingProfile(true);
-      setError(null);
+    // A regra não acompanha o await: fetchProfile só altera o estado depois da resposta da API
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProfile();
+  }, [user, fetchProfile]); // Re-executa se o usuário trocar de conta
 
-      try {
-        // Substitua essa linha pela sua rota real da API.
-        const response = await api.get(`/api/auth/me`);
-        setApiData(response.data);
-
-      } catch (err) {
-        console.error("Erro ao buscar perfil:", err);
-        setError("Não foi possível carregar os dados completos do perfil.");
-      } finally {
-        setIsFetchingProfile(false);
-      }
-    };
-
-    fetchProfileData();
-  }, [user]); // Re-executa se o usuário trocar de conta
-
-  // 4. O useMemo agora atua como um "Mesclador Seguro" (Safety Net)
+  // 4. O useMemo atua como um "Mesclador Seguro" (Safety Net)
   // Ele junta os dados básicos do Auth com os dados ricos da API e calcula o firstName
   const profile = useMemo<AppProfile>(() => {
     const name = apiData?.name || user?.name || "Usuário Kombinado";
@@ -60,7 +73,7 @@ export function useProfile() {
 
     const rawWhatsApp = apiData?.whatsApp || "WhatsApp não cadastrado";
     let formattedWhatsApp = rawWhatsApp;
-    
+
     if (rawWhatsApp !== "WhatsApp não cadastrado") {
       const digits = rawWhatsApp.replace(/\D/g, "");
       if (digits.length > 7) {
@@ -89,6 +102,9 @@ export function useProfile() {
     signOut,
     // O App está "carregando" se o Auth estiver processando OU se a API estiver buscando
     isLoading: isAuthLoading || isFetchingProfile,
+    // Indica se os dados completos da API já chegaram ao menos uma vez
+    hasProfileData: apiData !== null,
     error,
+    refetch,
   };
 }
