@@ -16,11 +16,8 @@ export function usePassengerRideRequests() {
   );
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadRequests = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setActionError(null);
-
+  // Busca os dados e só altera o estado depois da resposta, por isso pode rodar direto no useEffect
+  const fetchRequests = useCallback(async () => {
     try {
       const response =
         await api.get<RideRequestResponseDto[]>("/api/requests/me");
@@ -42,6 +39,14 @@ export function usePassengerRideRequests() {
       setIsLoading(false);
     }
   }, []);
+
+  // Recarrega mostrando o carregamento (pull-to-refresh, "Tentar novamente" e após ações)
+  const loadRequests = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    setActionError(null);
+    return fetchRequests();
+  }, [fetchRequests]);
 
   const cancelRequest = useCallback(
     async (requestId: string) => {
@@ -79,9 +84,12 @@ export function usePassengerRideRequests() {
     [],
   );
 
+  // No carregamento inicial o estado já começa como "carregando"
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    // A regra não acompanha o await: fetchRequests só altera o estado depois da resposta da API
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchRequests();
+  }, [fetchRequests]);
 
   return {
     requests,
