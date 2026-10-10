@@ -1,10 +1,15 @@
 import { CreateRideModal } from "@/src/components/feature/CreateRideModal";
 import { DriverRideCard } from "@/src/components/feature/DriverRideCard";
 import { RequestsModal } from "@/src/components/feature/RequestsModal";
-import { formatRideDate, formatRideTime } from "@/src/hooks/apiTypes";
+import {
+  formatRideDate,
+  formatRideTime,
+  type RideFormData,
+} from "@/src/hooks/apiTypes";
 import { useCreateRide } from "@/src/hooks/useCreateRide";
 import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
 import { useDriverRides } from "@/src/hooks/useDriverRides";
+import { useProfile } from "@/src/hooks/useProfile";
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, RefreshControl } from "react-native";
@@ -13,7 +18,13 @@ export default function Driver() {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
 
-  const { createRide, error: createError } = useCreateRide();
+  const {
+    createRide,
+    isLoading: isCreatingRide,
+    error: createError,
+    clearError: clearCreateError,
+  } = useCreateRide();
+  const { profile } = useProfile();
   const {
     activeRides,
     isLoading: isRidesLoading,
@@ -32,14 +43,23 @@ export default function Driver() {
     respondingRequestId,
   } = useDriverRideRequests(selectedRideId);
 
-  const handleCreateRide = async (data: any) => {
+  const openCreateModal = () => {
+    clearCreateError();
+    setIsCreateModalVisible(true);
+  };
+
+  const closeCreateModal = () => {
+    clearCreateError();
+    setIsCreateModalVisible(false);
+  };
+
+  // Retorna false em caso de erro para o modal continuar aberto, com os dados e a mensagem da API
+  const handleCreateRide = async (data: RideFormData) => {
     const success = await createRide(data);
-    if (success) {
-      setIsCreateModalVisible(false);
-      refetchRides();
-    } else {
-      Alert.alert("Erro", "Não foi possível criar a carona.");
-    }
+    if (!success) return false;
+
+    refetchRides();
+    return true;
   };
 
   const handleCancelRide = (rideId: string) => {
@@ -110,7 +130,7 @@ export default function Driver() {
       </ScrollView>
 
       <Pressable
-        onPress={() => setIsCreateModalVisible(true)}
+        onPress={openCreateModal}
         className="absolute right-6 bottom-6 w-16 h-16 bg-black rounded-full items-center justify-center shadow-lg shadow-black/40 active:scale-90 active:bg-black/70 transition-all z-10"
         accessibilityRole="button"
         accessibilityLabel="Criar nova carona"
@@ -134,8 +154,12 @@ export default function Driver() {
 
       <CreateRideModal
         isVisible={isCreateModalVisible}
-        onClose={() => setIsCreateModalVisible(false)}
+        onClose={closeCreateModal}
         onSubmit={handleCreateRide}
+        isSubmitting={isCreatingRide}
+        errorMessage={createError}
+        // Sem capacidade cadastrada (motoristas antigos), o modal usa o limite da API (8)
+        maxSeats={profile.vehicleTotalSeats ?? undefined}
       />
     </View>
   );

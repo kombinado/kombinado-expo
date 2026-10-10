@@ -8,6 +8,7 @@ export type RideRequestStatus =
 
 export interface RideResponseDto {
   id: string;
+  driverName?: string;
   origin: string;
   destination: string;
   departureTime: string;

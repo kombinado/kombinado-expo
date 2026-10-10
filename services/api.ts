@@ -2,6 +2,15 @@ import { tokenStorage } from "./storage";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
+// Tempo máximo de espera por uma resposta, para nenhuma tela ficar carregando para sempre
+const REQUEST_TIMEOUT_MS = 30000;
+
+const NETWORK_ERROR_MESSAGE =
+  "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado).";
+const TIMEOUT_ERROR_MESSAGE =
+  "O servidor demorou demais para responder. Verifique sua conexão e tente novamente.";
+const SESSION_EXPIRED_MESSAGE = "Sessão expirada. Faça login novamente.";
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
@@ -24,37 +33,89 @@ let isRefreshing = false;
 type FailedRequest = {
   resolve: (value: any) => void;
   reject: (reason: any) => void;
-  config: {
-    path: string;
-    options: RequestInit;
-  };
+  path: string;
+  options: RequestInit;
 };
 let failedQueue: FailedRequest[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
+// Libera todas as requisições da fila: com erro, ou repetindo cada uma com o token novo
+const processQueue = (error: Error | null) => {
+  const queue = failedQueue;
+  failedQueue = [];
+
+  queue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
-      // Injeta o novo token no cabeçalho das requisições enfileiradas
-      if (prom.config.options.headers) {
-        (prom.config.options.headers as any)["Authorization"] =
-          `Bearer ${token}`;
-      }
-      // Re-executa a requisição original
-      fetch(`${BASE_URL}${prom.config.path}`, prom.config.options)
-        .then((res) => res.json())
-        .then((data) => prom.resolve(data))
-        .catch((err) => prom.reject(err));
+      // request() lê o token novo do storage e trata a resposta igual a qualquer chamada
+      request(prom.path, prom.options, true).then(prom.resolve, prom.reject);
     }
   });
-
-  failedQueue = [];
 };
+
+// Converte erros de rede e de timeout em mensagens amigáveis
+function toFriendlyError(error: any): Error {
+  if (error?.name === "AbortError") {
+    return new Error(TIMEOUT_ERROR_MESSAGE);
+  }
+  if (error?.message?.includes("Network request failed")) {
+    return new Error(NETWORK_ERROR_MESSAGE);
+  }
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Retorna o novo access token, ou null se a API recusar a renovação (sessão expirada).
+// Erros de rede são lançados: nesse caso o usuário não é deslogado e pode tentar de novo.
+async function refreshTokens(): Promise<string | null> {
+  const currentAccessToken = await tokenStorage.getAccessToken();
+  const refreshToken = await tokenStorage.getRefreshToken();
+
+  if (!currentAccessToken || !refreshToken) return null;
+
+  console.log("[API] Access Token expirado. Tentando rotacionar...");
+
+  // Chamada manual de refresh para evitar loop recursivo infinito
+  const refreshRes = await fetchWithTimeout(`${BASE_URL}/api/Auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      accessToken: currentAccessToken,
+      refreshToken: refreshToken,
+    }),
+  });
+
+  if (!refreshRes.ok) return null;
+
+  const refreshPayload: ApiResponse = await refreshRes.json();
+  if (!refreshPayload.success || !refreshPayload.data) return null;
+
+  const { accessToken: newAccess, refreshToken: newRefresh } =
+    refreshPayload.data;
+
+  // Salva os novos tokens rotacionados
+  await tokenStorage.saveTokens(newAccess, newRefresh);
+  console.log("[API] Tokens rotacionados com sucesso.");
+
+  return newAccess;
+}
 
 async function request<T = any>(
   path: string,
   options: RequestInit = {},
+  isRetry = false,
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
 
@@ -73,7 +134,7 @@ async function request<T = any>(
   options.headers = headers;
 
   try {
-    const response = await fetch(url, options);
+    const response = await fetchWithTimeout(url, options);
 
     // Caso de erro de credencial ou token expirado (401)
     // Se a rota for de Auth (login, signup, refresh), nós NÃO interceptamos, pois o 401 significa apenas credenciais inválidas.
@@ -82,71 +143,43 @@ async function request<T = any>(
       if (isRefreshing) {
         // Se já está acontecendo um refresh, enfileira a requisição atual
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject, config: { path, options } });
+          failedQueue.push({ resolve, reject, path, options });
         });
       }
 
-      isRefreshing = true;
-
-      const currentAccessToken = await tokenStorage.getAccessToken();
-      const refreshToken = await tokenStorage.getRefreshToken();
-
-      if (currentAccessToken && refreshToken) {
+      // Uma requisição repetida com token novo que volta a dar 401 não tenta outro refresh
+      let newAccessToken: string | null = null;
+      if (!isRetry) {
+        isRefreshing = true;
         try {
-          console.log("[API] Access Token expirado. Tentando rotacionar...");
-
-          // Chamada manual de refresh para evitar loop recursivo infinito
-          const refreshRes = await fetch(`${BASE_URL}/api/Auth/refresh`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              accessToken: currentAccessToken,
-              refreshToken: refreshToken,
-            }),
-          });
-
-          if (refreshRes.ok) {
-            const refreshPayload: ApiResponse = await refreshRes.json();
-            if (refreshPayload.success && refreshPayload.data) {
-              const { accessToken: newAccess, refreshToken: newRefresh } =
-                refreshPayload.data;
-
-              // Salva os novos tokens rotacionados
-              await tokenStorage.saveTokens(newAccess, newRefresh);
-
-              console.log("[API] Tokens rotacionados com sucesso.");
-
-              // Injeta o novo token e re-executa a requisição atual
-              headers.set("Authorization", `Bearer ${newAccess}`);
-              options.headers = headers;
-
-              // Processa outras requisições que aguardavam na fila
-              processQueue(null, newAccess);
-
-              isRefreshing = false;
-
-              // Repete a requisição original
-              const retryResponse = await fetch(url, options);
-              return await retryResponse.json();
-            }
-          }
+          newAccessToken = await refreshTokens();
         } catch (refreshErr) {
-          console.error("[API] Falha crítica ao atualizar token:", refreshErr);
-          processQueue(refreshErr, null);
+          console.error("[API] Falha ao atualizar token:", refreshErr);
+          const friendlyError = toFriendlyError(refreshErr);
+          processQueue(friendlyError);
+          throw friendlyError;
+        } finally {
+          isRefreshing = false;
         }
       }
 
-      isRefreshing = false;
+      if (newAccessToken) {
+        // Processa outras requisições que aguardavam na fila e repete a requisição original
+        processQueue(null);
+        return await request<T>(path, options, true);
+      }
+
       console.warn("[API] Sessão expirada de vez. Deslogando usuário...");
+      const sessionError = new Error(SESSION_EXPIRED_MESSAGE);
+      processQueue(sessionError);
+
       // Limpa dados salvos e notifica o AuthProvider para deslogar
       await tokenStorage.clearAll();
       if (onUnauthorizedCallback) {
         onUnauthorizedCallback();
       }
 
-      throw new Error("Sessão expirada. Faça login novamente.");
+      throw sessionError;
     }
 
     // Lê a resposta como texto e tenta fazer o parse seguro para evitar quebra com erros 500 HTML
@@ -188,13 +221,8 @@ async function request<T = any>(
     return data as ApiResponse<T>;
   } catch (error: any) {
     console.log(`[API Warning] Aviso na chamada a ${path}:`, error.message);
-    // Caso seja erro de certificado ou falta de conexão
-    if (error.message && error.message.includes("Network request failed")) {
-      throw new Error(
-        "Erro de rede: Não foi possível conectar ao servidor. Verifique se o servidor está rodando e se a URL no seu .env está acessível para o emulador Android (ex: use HTTP em vez de HTTPS para evitar problemas com certificado SSL autoassinado).",
-      );
-    }
-    throw error;
+    // Caso seja timeout, erro de certificado ou falta de conexão
+    throw toFriendlyError(error);
   }
 }
 
