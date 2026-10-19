@@ -2,6 +2,7 @@ import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
 import { ErrorState } from "@/src/components/ui/ErrorState";
 import { LoadingState } from "@/src/components/ui/LoadingState";
 import { useProfile } from "@/src/hooks/useProfile";
+import { useRouter } from "expo-router";
 import {
   Car,
   ChevronRight,
@@ -10,12 +11,10 @@ import {
   Lock,
   LogOut,
   Mail,
-  Palette,
-  Phone,
+  Palette, Pencil, Phone,
   User,
-  Users,
+  Users
 } from "lucide-react-native";
-import React from "react";
 import {
   Pressable,
   RefreshControl,
@@ -27,6 +26,8 @@ import {
 export default function Profile() {
   const { profile, isLoading, hasProfileData, error, refetch, signOut } =
     useProfile();
+
+      const router = useRouter();
 
   return (
     <ScrollView
@@ -189,6 +190,17 @@ export default function Profile() {
           )}
         </>
       )}
+      
+      <Pressable
+        onPress={() => router.push("./edit-profile")}
+        className="mb-6 flex-row items-center justify-center rounded-xl border border-[#E84855] bg-white p-4"
+      >
+        <Pencil size={20} color="#E84855" />
+        <Text className="ml-2 font-bold text-[#E84855]">
+          Editar perfil
+        </Text>
+      </Pressable>
+
 
       <Text className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-3 ml-1">
         Segurança
