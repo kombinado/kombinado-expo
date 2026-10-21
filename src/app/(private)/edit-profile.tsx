@@ -1,12 +1,13 @@
-
 import { api } from "@/services/api";
+import { ErrorState } from "@/src/components/ui/ErrorState";
+import { LoadingState } from "@/src/components/ui/LoadingState";
 import { ensureApiSuccess, getErrorMessage } from "@/src/hooks/apiHookUtils";
 import type { UserProfileResponseDto } from "@/src/hooks/apiTypes";
 import { useAuth } from "@/src/hooks/useAuth";
-import { useProfile } from "@/src/hooks/useProfile";
-import { Stack, useRouter } from "expo-router";
+import { type AppProfile, useProfile } from "@/src/hooks/useProfile";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -17,110 +18,162 @@ import {
   TextInput,
   View,
 } from "react-native";
-  
+
 export default function EditProfile() {
-    const router = useRouter();
-    const { profile, isLoading } = useProfile();
-    const { updateUser } = useAuth();
+  const router = useRouter();
+  const { profile, isLoading, error, refetch } = useProfile();
 
-    const [name, setName] = useState("");
-    const [whatsApp, setWhatsApp] = useState("");
-    const [course, setCourse] = useState("");
+  // Esta tela é uma aba escondida, então continua montada entre as visitas.
+  // Ao voltar para ela, buscamos o perfil de novo: o formulário é recriado com os dados
+  // atuais e o que foi digitado sem salvar é descartado. Na primeira visita o useProfile já busca.
+  const isFirstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      refetch();
+    }, [refetch]),
+  );
 
+  return (
+    <>
+      <Stack.Screen options={{ title: "Editar perfil" }} />
 
-    const [vehicleModel, setVehicleModel] = useState("");
-    const [vehicleColor, setVehicleColor] = useState("");
-    const [vehiclePlate, setVehiclePlate] = useState("");
-    const [vehicleTotalSeats, setVehicleTotalSeats] = useState("");
-    const [isSaving, setIsSaving] = useState(false);
+      <KeyboardAvoidingView
+        className="flex-1 bg-[#FAF9F9]"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            padding: 20,
+            paddingBottom: 40,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Pressable
+            onPress={() => router.replace("./profile")}
+            className="mt-4 mb-6 flex-row items-center self-start py-2"
+          >
+            <ArrowLeft size={22} color="#E84855" />
+            <Text className="ml-2 font-semibold text-[#E84855]">
+              Voltar ao perfil
+            </Text>
+          </Pressable>
 
-// theses states keep the data t will be typed in the forms
+          <Text className="mb-2 text-2xl font-bold text-[#040F0F]">
+            Editar perfil
+          </Text>
 
+          <Text className="mb-6 text-base text-gray-600">
+            Atualize suas informações pessoais e, se você for motorista, os
+            dados do seu veículo.
+          </Text>
 
-  useEffect(() => {
-    if (isLoading) return;
+          {/* O formulário só aparece com o perfil carregado, para nunca abrir com campos vazios */}
+          {isLoading ? (
+            <LoadingState />
+          ) : error ? (
+            <ErrorState message={error} onRetry={refetch} />
+          ) : (
+            <EditProfileForm profile={profile} />
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </>
+  );
+}
 
-    setName(
-      profile.name === "Usuário Kombinado" ? "" : profile.name
-    );
+// Os textos padrão do useProfile ("WhatsApp não cadastrado" etc.) não podem virar valor de campo
+function toInitialValues(profile: AppProfile) {
+  return {
+    name: profile.name === "Usuário Kombinado" ? "" : profile.name,
+    whatsApp:
+      profile.whatsApp === "WhatsApp não cadastrado" ? "" : profile.whatsApp,
+    course: profile.course === "Curso não informado" ? "" : profile.course,
+    vehicleModel: profile.vehicleModel ?? "",
+    vehicleColor: profile.vehicleColor ?? "",
+    vehiclePlate: profile.vehiclePlate ?? "",
+    vehicleTotalSeats:
+      profile.vehicleTotalSeats != null ? String(profile.vehicleTotalSeats) : "",
+  };
+}
 
-    setWhatsApp(
-      profile.whatsApp === "WhatsApp não cadastrado"
-        ? ""
-        : profile.whatsApp
-    );
+// Recebe o perfil já carregado e usa como valor inicial dos campos.
+// Como é recriado a cada carregamento, não precisa de useEffect para copiar os dados.
+function EditProfileForm({ profile }: { profile: AppProfile }) {
+  const router = useRouter();
+  const { updateUser } = useAuth();
 
-    setCourse(
-      profile.course === "Curso não informado" ? "" : profile.course
-    );
+  // Estes estados guardam o que é digitado nos campos (o valor inicial só é usado na montagem)
+  const initialValues = toInitialValues(profile);
+  const [name, setName] = useState(initialValues.name);
+  const [whatsApp, setWhatsApp] = useState(initialValues.whatsApp);
+  const [course, setCourse] = useState(initialValues.course);
 
+  const [vehicleModel, setVehicleModel] = useState(initialValues.vehicleModel);
+  const [vehicleColor, setVehicleColor] = useState(initialValues.vehicleColor);
+  const [vehiclePlate, setVehiclePlate] = useState(initialValues.vehiclePlate);
+  const [vehicleTotalSeats, setVehicleTotalSeats] = useState(
+    initialValues.vehicleTotalSeats,
+  );
+  const [isSaving, setIsSaving] = useState(false);
 
-    setVehicleModel(profile.vehicleModel ?? "");
-    setVehicleColor(profile.vehicleColor ?? "");
-    setVehiclePlate(profile.vehiclePlate ?? "");
-    setVehicleTotalSeats(
-    profile.vehicleTotalSeats != null
-        ? String(profile.vehicleTotalSeats)
-        : ""
-    ); }, [profile, isLoading]);
+  const handleSave = async () => {
+    const cleanWhatsApp = whatsApp.replace(/\D/g, "");
+    const cleanPlate = vehiclePlate.trim().toUpperCase().replace(/-/g, "");
 
-    const handleSave = async () =>{
-      const cleanWhatsApp = whatsApp.replace(/\D/g, "");
-      const cleanPlate = vehiclePlate.trim().toUpperCase().replace(/-/g,"");
+    // Validação dos dados pessoais
+    if (!name.trim() || !course.trim()) {
+      Alert.alert("Atenção", "Preencha seu nome e curso.");
+      return;
+    }
 
-      //Personal validation
-      if(!name.trim() || !course.trim()){
-        Alert.alert("Atenção", "Preencha seu nome e curso.");
+    if (!/^\d{10,11}$/.test(cleanWhatsApp)) {
+      Alert.alert(
+        "Atenção",
+        "Informe um WhatsApp com DDD, contendo 10 ou 11 números.",
+      );
+      return;
+    }
+
+    const perfilData: Record<string, unknown> = {
+      name: name.trim(),
+      whatsApp: cleanWhatsApp,
+      course: course.trim(),
+    };
+
+    // Inclui os dados do veículo, apenas para motoristas
+    if (profile.isDriver) {
+      const seats = Number(vehicleTotalSeats);
+
+      if (
+        !vehicleModel.trim() ||
+        !vehicleColor.trim() ||
+        !cleanPlate ||
+        (!/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(cleanPlate) &&
+          !/^[A-Z]{3}\d{4}$/.test(cleanPlate))
+      ) {
+        Alert.alert("Atenção", "Confira o modelo, a cor e a placa do veículo.");
         return;
       }
 
-       if (!/^\d{10,11}$/.test(cleanWhatsApp)) {
+      if (
+        vehicleTotalSeats.trim() === "" ||
+        !Number.isInteger(seats) ||
+        seats < 1 ||
+        seats > 8
+      ) {
         Alert.alert(
           "Atenção",
-          "Informe um WhatsApp com DDD, contendo 10 ou 11 números."
+          "A quantidade de lugares deve ser um número inteiro entre 1 e 8.",
         );
         return;
       }
 
-      //
-
-      const perfilData : Record<string, unknown> ={
-        name: name.trim(),
-        whatsApp: cleanWhatsApp,
-        course: course.trim()
-      };
-
-      //include vehicles data, only for drivers
-
-      if(profile.isDriver){
-        const seats = Number(vehicleTotalSeats)
-
-        if (
-          !vehicleModel.trim() ||
-          !vehicleColor.trim() ||
-          !cleanPlate ||
-          !/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(cleanPlate) &&
-            !/^[A-Z]{3}\d{4}$/.test(cleanPlate)
-        ) {
-          Alert.alert(
-            "Atenção",
-            "Confira o modelo, a cor e a placa do veículo."
-          );
-          return;
-        }
-
-        if (
-          vehicleTotalSeats.trim() === "" ||
-          !Number.isInteger(seats) ||
-          seats < 1 ||
-          seats > 8
-        ) {
-          Alert.alert(
-            "Atenção",
-            "A quantidade de lugares deve ser um número inteiro entre 1 e 8."
-          );
-          return;
-        }
       Object.assign(perfilData, {
         vehicleModel: vehicleModel.trim(),
         vehicleColor: vehicleColor.trim(),
@@ -155,8 +208,8 @@ export default function EditProfile() {
         "Erro ao salvar",
         getErrorMessage(
           error,
-          "Não foi possível atualizar seu perfil. Tente novamente."
-        )
+          "Não foi possível atualizar seu perfil. Tente novamente.",
+        ),
       );
     } finally {
       setIsSaving(false);
@@ -165,135 +218,84 @@ export default function EditProfile() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Editar perfil" }} />
-
-      <KeyboardAvoidingView
-        className="flex-1 bg-[#FAF9F9]"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: 40,
-          }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-
-          
-          <Pressable
-            onPress={() => router.replace("./profile")}
-            className="mt-4 mb-6 flex-row items-center self-start py-2"
-          >
-            <ArrowLeft size={22} color="#E84855" />
-            <Text className="ml-2 font-semibold text-[#E84855]">
-              Voltar ao perfil
-            </Text>
-          </Pressable>
-
-          <Text className="mb-2 text-2xl font-bold text-[#040F0F]">
-            Editar perfil
-          </Text>
-
-          <Text className="mb-6 text-base text-gray-600">
-            Atualize suas informações pessoais e, se você for motorista,
-            os dados do seu veículo.
-          </Text>
-
-          
-        <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+      <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
         <Text className="mb-4 text-lg font-bold text-[#040F0F]">
-            Informações pessoais
+          Informações pessoais
         </Text>
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">
-            Nome completo
-        </Text>
+        <Text className="mb-2 font-semibold text-[#040F0F]">Nome completo</Text>
         <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Digite seu nome completo"
-            maxLength={100}
-            autoCapitalize="words"
-            className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+          value={name}
+          onChangeText={setName}
+          placeholder="Digite seu nome completo"
+          maxLength={100}
+          autoCapitalize="words"
+          className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
+          placeholderTextColor="#888888"
         />
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">
-            WhatsApp
-        </Text>
+        <Text className="mb-2 font-semibold text-[#040F0F]">WhatsApp</Text>
         <TextInput
-            value={whatsApp}
-            onChangeText={setWhatsApp}
-            placeholder="DDD + número"
-            keyboardType="phone-pad"
-            className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+          value={whatsApp}
+          onChangeText={setWhatsApp}
+          placeholder="DDD + número"
+          keyboardType="phone-pad"
+          className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
+          placeholderTextColor="#888888"
         />
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">
-            Curso
-        </Text>
+        <Text className="mb-2 font-semibold text-[#040F0F]">Curso</Text>
         <TextInput
-            value={course}
-            onChangeText={setCourse}
-            placeholder="Digite seu curso"
-            maxLength={100}
-            className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+          value={course}
+          onChangeText={setCourse}
+          placeholder="Digite seu curso"
+          maxLength={100}
+          className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
+          placeholderTextColor="#888888"
         />
-        </View>
+      </View>
 
-        {profile.isDriver && (
+      {profile.isDriver && (
         <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <Text className="mb-4 text-lg font-bold text-[#040F0F]">
+          <Text className="mb-4 text-lg font-bold text-[#040F0F]">
             Dados do veículo
-            </Text>
+          </Text>
 
-            <Text className="mb-2 font-semibold text-[#040F0F]">
-            Modelo
-            </Text>
-            <TextInput
+          <Text className="mb-2 font-semibold text-[#040F0F]">Modelo</Text>
+          <TextInput
             value={vehicleModel}
             onChangeText={setVehicleModel}
             placeholder="Ex.: Honda Civic"
             maxLength={50}
             className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
             placeholderTextColor="#888888"
-            />
+          />
 
-            <Text className="mb-2 font-semibold text-[#040F0F]">
-            Cor
-            </Text>
-            <TextInput
+          <Text className="mb-2 font-semibold text-[#040F0F]">Cor</Text>
+          <TextInput
             value={vehicleColor}
             onChangeText={setVehicleColor}
             placeholder="Ex.: Prata"
             maxLength={30}
             className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
             placeholderTextColor="#888888"
-            />
+          />
 
-            <Text className="mb-2 font-semibold text-[#040F0F]">
-            Placa
-            </Text>
-            <TextInput
+          <Text className="mb-2 font-semibold text-[#040F0F]">Placa</Text>
+          <TextInput
             value={vehiclePlate}
-            onChangeText={(value) =>
-                setVehiclePlate(value.toUpperCase())
-            }
+            onChangeText={(value) => setVehiclePlate(value.toUpperCase())}
             placeholder="Ex.: ABC1D23"
             maxLength={7}
             autoCapitalize="characters"
             className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
             placeholderTextColor="#888888"
-            />
+          />
 
-            <Text className="mb-2 font-semibold text-[#040F0F]">
+          <Text className="mb-2 font-semibold text-[#040F0F]">
             Quantidade de lugares
-            </Text>
-            <TextInput
+          </Text>
+          <TextInput
             value={vehicleTotalSeats}
             onChangeText={setVehicleTotalSeats}
             placeholder="De 1 a 8"
@@ -301,27 +303,21 @@ export default function EditProfile() {
             maxLength={1}
             className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
             placeholderTextColor="#888888"
-            />
+          />
         </View>
-        
-        )}
+      )}
 
-        <Pressable
-          onPress={handleSave}
-          disabled={isSaving || isLoading}
-          className={`mt-2 items-center justify-center rounded-xl p-4 ${
-            isSaving || isLoading ? "bg-gray-400" : "bg-[#E84855]"
-          }`}
-        >
-          <Text className="font-bold text-white">
-            {isSaving ? "Salvando..." : "Salvar alterações"}
-          </Text>
-        </Pressable>
-
-        
-
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <Pressable
+        onPress={handleSave}
+        disabled={isSaving}
+        className={`mt-2 items-center justify-center rounded-xl p-4 ${
+          isSaving ? "bg-gray-400" : "bg-[#E84855]"
+        }`}
+      >
+        <Text className="font-bold text-white">
+          {isSaving ? "Salvando..." : "Salvar alterações"}
+        </Text>
+      </Pressable>
     </>
   );
 }
