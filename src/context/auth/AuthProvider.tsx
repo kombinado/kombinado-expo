@@ -15,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (payload: any) => Promise<void>;
   signOut: () => Promise<void>;
+  updateUser: (changes: Partial<UserProfile>) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -121,6 +122,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Atualiza os dados do usuário logado (ex.: depois de editar o perfil).
+  // Trocar o user atualiza o Header e faz todo useProfile buscar o perfil de novo.
+  const updateUser = async (changes: Partial<UserProfile>) => {
+    if (!user) return;
+
+    const updatedUser = { ...user, ...changes };
+    setUser(updatedUser);
+    await tokenStorage.saveUserData(updatedUser);
+  };
+
   const signOut = async () => {
     try {
       await tokenStorage.clearAll();
@@ -135,7 +146,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ userToken, user, isLoading, signIn, signUp, signOut }}
+      value={{
+        userToken,
+        user,
+        isLoading,
+        signIn,
+        signUp,
+        signOut,
+        updateUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

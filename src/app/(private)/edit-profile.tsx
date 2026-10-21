@@ -1,6 +1,8 @@
 
 import { api } from "@/services/api";
-import { getErrorMessage } from "@/src/hooks/apiHookUtils";
+import { ensureApiSuccess, getErrorMessage } from "@/src/hooks/apiHookUtils";
+import type { UserProfileResponseDto } from "@/src/hooks/apiTypes";
+import { useAuth } from "@/src/hooks/useAuth";
 import { useProfile } from "@/src/hooks/useProfile";
 import { Stack, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
@@ -18,7 +20,8 @@ import {
   
 export default function EditProfile() {
     const router = useRouter();
-    const { profile, isLoading, refetch } = useProfile();
+    const { profile, isLoading } = useProfile();
+    const { updateUser } = useAuth();
 
     const [name, setName] = useState("");
     const [whatsApp, setWhatsApp] = useState("");
@@ -129,9 +132,21 @@ export default function EditProfile() {
     try {
       setIsSaving(true);
 
-      await api.put("/api/users/profile", perfilData);
+      const response = await api.put<UserProfileResponseDto>(
+        "/api/users/profile",
+        perfilData,
+      );
+      const updatedProfile = ensureApiSuccess(
+        response,
+        "Não foi possível atualizar seu perfil. Tente novamente.",
+      );
 
-      await refetch();
+      // Cada tela tem a própria cópia do perfil (useProfile). Atualizar o usuário logado
+      // faz Perfil, Motorista e Header recarregarem os dados, em vez de mostrar os antigos.
+      await updateUser({
+        name: updatedProfile.name,
+        isDriver: updatedProfile.isDriver,
+      });
 
       Alert.alert("Sucesso", "Perfil atualizado!");
       router.replace("./profile");

@@ -63,7 +63,7 @@ export function useProfile() {
     // A regra não acompanha o await: fetchProfile só altera o estado depois da resposta da API
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProfile();
-  }, [user, fetchProfile]); // Re-executa se o usuário trocar de conta
+  }, [user, fetchProfile]); // Re-executa se o usuário trocar de conta ou editar o perfil (updateUser)
 
   // 4. O useMemo atua como um "Mesclador Seguro" (Safety Net)
   // Ele junta os dados básicos do Auth com os dados ricos da API e calcula o firstName
