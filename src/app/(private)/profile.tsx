@@ -192,7 +192,7 @@ export default function Profile() {
       )}
       
       <Pressable
-        onPress={() => router.push("./edit-profile")}
+        onPress={() => router.push("/edit-profile")}
         className="mb-6 flex-row items-center justify-center rounded-xl border border-[#E84855] bg-white p-4"
       >
         <Pencil size={20} color="#E84855" />

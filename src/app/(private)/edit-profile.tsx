@@ -6,11 +6,12 @@ import { ensureApiSuccess, getErrorMessage } from "@/src/hooks/apiHookUtils";
 import type { UserProfileResponseDto } from "@/src/hooks/apiTypes";
 import { useAuth } from "@/src/hooks/useAuth";
 import { type AppProfile, useProfile } from "@/src/hooks/useProfile";
-import { Stack, useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   Alert,
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -38,53 +39,63 @@ export default function EditProfile() {
     }, [refetch]),
   );
 
+  // Nas abas, o botão voltar do Android iria para a Home. Aqui ele volta para o Perfil.
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          router.navigate("/profile");
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [router]),
+  );
+
   return (
-    <>
-      <Stack.Screen options={{ title: "Editar perfil" }} />
-
-      <KeyboardAvoidingView
-        className="flex-1 bg-[#FAF9F9]"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#FAF9F9]"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: 40,
-          }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <Pressable
+          onPress={() => router.navigate("/profile")}
+          className="mt-4 mb-6 flex-row items-center self-start py-2"
         >
-          <Pressable
-            onPress={() => router.replace("./profile")}
-            className="mt-4 mb-6 flex-row items-center self-start py-2"
-          >
-            <ArrowLeft size={22} color="#E84855" />
-            <Text className="ml-2 font-semibold text-[#E84855]">
-              Voltar ao perfil
-            </Text>
-          </Pressable>
-
-          <Text className="mb-2 text-2xl font-bold text-[#040F0F]">
-            Editar perfil
+          <ArrowLeft size={22} color="#E84855" />
+          <Text className="ml-2 font-semibold text-[#E84855]">
+            Voltar ao perfil
           </Text>
+        </Pressable>
 
-          <Text className="mb-6 text-base text-gray-600">
-            Atualize suas informações pessoais e, se você for motorista, os
-            dados do seu veículo.
-          </Text>
+        <Text className="mb-2 text-2xl font-bold text-[#040F0F]">
+          Editar perfil
+        </Text>
 
-          {/* O formulário só aparece com o perfil carregado, para nunca abrir com campos vazios */}
-          {isLoading ? (
-            <LoadingState />
-          ) : error ? (
-            <ErrorState message={error} onRetry={refetch} />
-          ) : (
-            <EditProfileForm profile={profile} />
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </>
+        <Text className="mb-6 text-base text-gray-600">
+          Atualize suas informações pessoais e, se você for motorista, os dados
+          do seu veículo.
+        </Text>
+
+        {/* O formulário só aparece com o perfil carregado, para nunca abrir com campos vazios */}
+        {isLoading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState message={error} onRetry={refetch} />
+        ) : (
+          <EditProfileForm profile={profile} />
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -99,7 +110,9 @@ function toInitialValues(profile: AppProfile) {
     vehicleColor: profile.vehicleColor ?? "",
     vehiclePlate: profile.vehiclePlate ?? "",
     vehicleTotalSeats:
-      profile.vehicleTotalSeats != null ? String(profile.vehicleTotalSeats) : "",
+      profile.vehicleTotalSeats != null
+        ? String(profile.vehicleTotalSeats)
+        : "",
   };
 }
 
@@ -137,7 +150,9 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
     }
 
     if (!/^\d{10,11}$/.test(cleanWhatsApp)) {
-      setErrorMessage("Informe um WhatsApp com DDD, contendo 10 ou 11 números.");
+      setErrorMessage(
+        "Informe um WhatsApp com DDD, contendo 10 ou 11 números.",
+      );
       return;
     }
 
@@ -204,7 +219,7 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
       });
 
       Alert.alert("Sucesso", "Perfil atualizado!");
-      router.replace("./profile");
+      router.navigate("/profile");
     } catch (error) {
       setErrorMessage(
         getErrorMessage(
