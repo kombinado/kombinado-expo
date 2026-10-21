@@ -90,6 +90,14 @@ export default function AppLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="edit-profile"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 }
