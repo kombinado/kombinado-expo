@@ -1,21 +1,24 @@
 
+import { api } from "@/services/api";
+import { getErrorMessage } from "@/src/hooks/apiHookUtils";
 import { useProfile } from "@/src/hooks/useProfile";
 import { Stack, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
   
 export default function EditProfile() {
     const router = useRouter();
-    const { profile, isLoading } = useProfile();
+    const { profile, isLoading, refetch } = useProfile();
 
     const [name, setName] = useState("");
     const [whatsApp, setWhatsApp] = useState("");
@@ -26,8 +29,9 @@ export default function EditProfile() {
     const [vehicleColor, setVehicleColor] = useState("");
     const [vehiclePlate, setVehiclePlate] = useState("");
     const [vehicleTotalSeats, setVehicleTotalSeats] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
 
-// Estes estados guardam os dados que serão digitados no formulário.
+// theses states keep the data t will be typed in the forms
 
 
   useEffect(() => {
@@ -55,9 +59,94 @@ export default function EditProfile() {
     profile.vehicleTotalSeats != null
         ? String(profile.vehicleTotalSeats)
         : ""
-    );
+    ); }, [profile, isLoading]);
 
-  }, [profile, isLoading]);
+    const handleSave = async () =>{
+      const cleanWhatsApp = whatsApp.replace(/\D/g, "");
+      const cleanPlate = vehiclePlate.trim().toUpperCase().replace(/-/g,"");
+
+      //Personal validation
+      if(!name.trim() || !course.trim()){
+        Alert.alert("Atenção", "Preencha seu nome e curso.");
+        return;
+      }
+
+       if (!/^\d{10,11}$/.test(cleanWhatsApp)) {
+        Alert.alert(
+          "Atenção",
+          "Informe um WhatsApp com DDD, contendo 10 ou 11 números."
+        );
+        return;
+      }
+
+      //
+
+      const perfilData : Record<string, unknown> ={
+        name: name.trim(),
+        whatsApp: cleanWhatsApp,
+        course: course.trim()
+      };
+
+      //include vehicles data, only for drivers
+
+      if(profile.isDriver){
+        const seats = Number(vehicleTotalSeats)
+
+        if (
+          !vehicleModel.trim() ||
+          !vehicleColor.trim() ||
+          !cleanPlate ||
+          !/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(cleanPlate) &&
+            !/^[A-Z]{3}\d{4}$/.test(cleanPlate)
+        ) {
+          Alert.alert(
+            "Atenção",
+            "Confira o modelo, a cor e a placa do veículo."
+          );
+          return;
+        }
+
+        if (
+          vehicleTotalSeats.trim() === "" ||
+          !Number.isInteger(seats) ||
+          seats < 1 ||
+          seats > 8
+        ) {
+          Alert.alert(
+            "Atenção",
+            "A quantidade de lugares deve ser um número inteiro entre 1 e 8."
+          );
+          return;
+        }
+      Object.assign(perfilData, {
+        vehicleModel: vehicleModel.trim(),
+        vehicleColor: vehicleColor.trim(),
+        vehiclePlate: cleanPlate,
+        vehicleTotalSeats: seats,
+      });
+    }
+
+    try {
+      setIsSaving(true);
+
+      await api.put("/api/users/profile", perfilData);
+
+      await refetch();
+
+      Alert.alert("Sucesso", "Perfil atualizado!");
+      router.replace("./profile");
+    } catch (error) {
+      Alert.alert(
+        "Erro ao salvar",
+        getErrorMessage(
+          error,
+          "Não foi possível atualizar seu perfil. Tente novamente."
+        )
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <>
@@ -76,6 +165,8 @@ export default function EditProfile() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+
+          
           <Pressable
             onPress={() => router.replace("./profile")}
             className="mt-4 mb-6 flex-row items-center self-start py-2"
@@ -197,7 +288,22 @@ export default function EditProfile() {
             placeholderTextColor="#888888"
             />
         </View>
+        
         )}
+
+        <Pressable
+          onPress={handleSave}
+          disabled={isSaving || isLoading}
+          className={`mt-2 items-center justify-center rounded-xl p-4 ${
+            isSaving || isLoading ? "bg-gray-400" : "bg-[#E84855]"
+          }`}
+        >
+          <Text className="font-bold text-white">
+            {isSaving ? "Salvando..." : "Salvar alterações"}
+          </Text>
+        </Pressable>
+
+        
 
         </ScrollView>
       </KeyboardAvoidingView>
