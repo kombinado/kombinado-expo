@@ -190,7 +190,6 @@ export default function Profile() {
             </>
           )}
 
-          {/* Só aparece com os dados carregados, para a edição não abrir com campos vazios */}
           <Pressable
             onPress={() => router.push("/edit-profile")}
             className="mb-6 flex-row items-center justify-center rounded-xl border border-[#E84855] bg-white p-4"

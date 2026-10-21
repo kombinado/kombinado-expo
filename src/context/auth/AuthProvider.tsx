@@ -122,8 +122,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Atualiza os dados do usuário logado (ex.: depois de editar o perfil).
-  // Trocar o user atualiza o Header e faz todo useProfile buscar o perfil de novo.
   const updateUser = async (changes: Partial<UserProfile>) => {
     if (!user) return;
 

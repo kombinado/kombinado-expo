@@ -25,9 +25,7 @@ export default function EditProfile() {
   const router = useRouter();
   const { profile, isLoading, error, refetch } = useProfile();
 
-  // Esta tela é uma aba escondida, então continua montada entre as visitas.
-  // Ao voltar para ela, buscamos o perfil de novo: o formulário é recriado com os dados
-  // atuais e o que foi digitado sem salvar é descartado. Na primeira visita o useProfile já busca.
+  // Hidden tabs stay mounted: refetch on later visits so the form drops unsaved edits
   const isFirstFocus = useRef(true);
   useFocusEffect(
     useCallback(() => {
@@ -39,7 +37,7 @@ export default function EditProfile() {
     }, [refetch]),
   );
 
-  // Nas abas, o botão voltar do Android iria para a Home. Aqui ele volta para o Perfil.
+  // Inside tabs, the Android back button would go to Home
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener(
@@ -86,7 +84,6 @@ export default function EditProfile() {
           do seu veículo.
         </Text>
 
-        {/* O formulário só aparece com o perfil carregado, para nunca abrir com campos vazios */}
         {isLoading ? (
           <LoadingState />
         ) : error ? (
@@ -99,7 +96,7 @@ export default function EditProfile() {
   );
 }
 
-// Os textos padrão do useProfile ("WhatsApp não cadastrado" etc.) não podem virar valor de campo
+// useProfile fills missing fields with display text, which must not become input values
 function toInitialValues(profile: AppProfile) {
   return {
     name: profile.name === "Usuário Kombinado" ? "" : profile.name,
@@ -116,13 +113,10 @@ function toInitialValues(profile: AppProfile) {
   };
 }
 
-// Recebe o perfil já carregado e usa como valor inicial dos campos.
-// Como é recriado a cada carregamento, não precisa de useEffect para copiar os dados.
 function EditProfileForm({ profile }: { profile: AppProfile }) {
   const router = useRouter();
   const { updateUser } = useAuth();
 
-  // Estes estados guardam o que é digitado nos campos (o valor inicial só é usado na montagem)
   const initialValues = toInitialValues(profile);
   const [name, setName] = useState(initialValues.name);
   const [whatsApp, setWhatsApp] = useState(initialValues.whatsApp);
@@ -135,7 +129,6 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
     initialValues.vehicleTotalSeats,
   );
   const [isSaving, setIsSaving] = useState(false);
-  // Erro de validação ou da API, mostrado acima do botão de salvar (mesmo padrão dos modais)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
@@ -143,7 +136,6 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
     const cleanPlate = vehiclePlate.trim().toUpperCase().replace(/-/g, "");
     setErrorMessage(null);
 
-    // Validação dos dados pessoais
     if (!name.trim() || !course.trim()) {
       setErrorMessage("Preencha seu nome e curso.");
       return;
@@ -162,7 +154,6 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
       course: course.trim(),
     };
 
-    // Inclui os dados do veículo, apenas para motoristas
     if (profile.isDriver) {
       const seats = Number(vehicleTotalSeats);
 
@@ -211,8 +202,7 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
         "Não foi possível atualizar seu perfil. Tente novamente.",
       );
 
-      // Cada tela tem a própria cópia do perfil (useProfile). Atualizar o usuário logado
-      // faz Perfil, Motorista e Header recarregarem os dados, em vez de mostrar os antigos.
+      // Changing the auth user makes every useProfile refetch (profile, driver, header)
       await updateUser({
         name: updatedProfile.name,
         isDriver: updatedProfile.isDriver,
@@ -302,7 +292,7 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
             value={vehiclePlate}
             onChangeText={(value) => setVehiclePlate(value.toUpperCase())}
             placeholder="Ex.: ABC1D23"
-            // 8 para aceitar o hífen (ABC-1234); ele é removido antes de enviar
+            // Allows a hyphen (ABC-1234), removed before sending
             maxLength={8}
             autoCapitalize="characters"
             className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
