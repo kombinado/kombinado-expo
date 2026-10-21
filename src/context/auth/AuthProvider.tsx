@@ -15,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (payload: any) => Promise<void>;
   signOut: () => Promise<void>;
+  updateUser: (changes: Partial<UserProfile>) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,6 +23,9 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userToken, setUserToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
+  // Só indica a restauração da sessão ao abrir o app. Enquanto é true, o NavigationGuard
+  // troca toda a navegação por um spinner, desmontando as telas (e o que foi digitado nelas).
+  // Por isso login, cadastro e logout usam o próprio estado de envio de cada tela.
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -75,7 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
     try {
       const response = await api.post("/api/Auth/login", { email, password });
 
@@ -100,13 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       console.log("[AuthProvider] Aviso no signIn:", error.message);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const signUp = async (payload: any) => {
-    setIsLoading(true);
     try {
       const response = await api.post("/api/Auth/signup", payload);
 
@@ -119,27 +119,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       console.log("[AuthProvider] Aviso no signUp:", error.message);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  const updateUser = async (changes: Partial<UserProfile>) => {
+    if (!user) return;
+
+    const updatedUser = { ...user, ...changes };
+    setUser(updatedUser);
+    await tokenStorage.saveUserData(updatedUser);
+  };
+
   const signOut = async () => {
-    setIsLoading(true);
     try {
       await tokenStorage.clearAll();
-      setUser(null);
-      setUserToken(null);
     } catch (error) {
       console.error("[AuthProvider] Erro no signOut:", error);
     } finally {
-      setIsLoading(false);
+      // Sem a sessão, o NavigationGuard leva o usuário para o login
+      setUser(null);
+      setUserToken(null);
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ userToken, user, isLoading, signIn, signUp, signOut }}
+      value={{
+        userToken,
+        user,
+        isLoading,
+        signIn,
+        signUp,
+        signOut,
+        updateUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

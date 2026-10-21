@@ -1,23 +1,39 @@
 import { CreateRideModal } from "@/src/components/feature/CreateRideModal";
 import { DriverRideCard } from "@/src/components/feature/DriverRideCard";
 import { RequestsModal } from "@/src/components/feature/RequestsModal";
-import { formatRideDate, formatRideTime } from "@/src/hooks/apiTypes";
+import { EmptyState } from "@/src/components/ui/EmptyState";
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
+import { ErrorState } from "@/src/components/ui/ErrorState";
+import { LoadingState } from "@/src/components/ui/LoadingState";
+import {
+  formatRideDate,
+  formatRideTime,
+  type RideFormData,
+} from "@/src/hooks/apiTypes";
 import { useCreateRide } from "@/src/hooks/useCreateRide";
 import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
 import { useDriverRides } from "@/src/hooks/useDriverRides";
-import { Plus } from "lucide-react-native";
+import { useProfile } from "@/src/hooks/useProfile";
+import { CarFront, Plus } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, RefreshControl } from "react-native";
+import { Alert, Pressable, ScrollView, View, RefreshControl } from "react-native";
 
 export default function Driver() {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
 
-  const { createRide, error: createError } = useCreateRide();
+  const {
+    createRide,
+    isLoading: isCreatingRide,
+    error: createError,
+    clearError: clearCreateError,
+  } = useCreateRide();
+  const { profile } = useProfile();
   const {
     activeRides,
     isLoading: isRidesLoading,
     error: ridesError,
+    actionError: cancelError,
     cancelRide,
     cancelingRideId,
     refetch: refetchRides,
@@ -27,19 +43,29 @@ export default function Driver() {
     requests,
     isLoading: isRequestsLoading,
     error: requestsError,
-    actionError,
+    actionError: respondError,
     respondToRequest,
     respondingRequestId,
+    refetch: refetchRequests,
   } = useDriverRideRequests(selectedRideId);
 
-  const handleCreateRide = async (data: any) => {
+  const openCreateModal = () => {
+    clearCreateError();
+    setIsCreateModalVisible(true);
+  };
+
+  const closeCreateModal = () => {
+    clearCreateError();
+    setIsCreateModalVisible(false);
+  };
+
+  // Retorna false em caso de erro para o modal continuar aberto, com os dados e a mensagem da API
+  const handleCreateRide = async (data: RideFormData) => {
     const success = await createRide(data);
-    if (success) {
-      setIsCreateModalVisible(false);
-      refetchRides();
-    } else {
-      Alert.alert("Erro", "Não foi possível criar a carona.");
-    }
+    if (!success) return false;
+
+    refetchRides();
+    return true;
   };
 
   const handleCancelRide = (rideId: string) => {
@@ -51,12 +77,8 @@ export default function Driver() {
         {
           text: "Sim, Cancelar",
           style: "destructive",
-          onPress: async () => {
-            const success = await cancelRide(rideId);
-            if (!success) {
-              Alert.alert("Erro", "Não foi possível cancelar a carona.");
-            }
-          },
+          // Em caso de erro, a mensagem da API aparece no banner acima da lista
+          onPress: () => cancelRide(rideId),
         },
       ]
     );
@@ -75,21 +97,18 @@ export default function Driver() {
           />
         }
       >
+        <ErrorBanner message={cancelError} className="mb-4" />
+
         {isRidesLoading ? (
-          <ActivityIndicator color="#E84855" size="large" />
+          <LoadingState />
         ) : ridesError ? (
-          <View className="items-center mt-10">
-            <Text className="text-rose-700 font-bold text-center mb-4">{ridesError}</Text>
-            <Pressable onPress={() => refetchRides()} className="bg-[#E84855] px-6 py-3 rounded-full">
-              <Text className="text-white font-bold">Tentar Novamente</Text>
-            </Pressable>
-          </View>
+          <ErrorState message={ridesError} onRetry={refetchRides} />
         ) : activeRides.length === 0 ? (
-          <View className="items-center mt-20">
-            <Text className="text-slate-500 font-semibold text-lg text-center">
-              Você ainda não ofereceu nenhuma carona ativa.
-            </Text>
-          </View>
+          <EmptyState
+            icon={CarFront}
+            message="Você ainda não ofereceu nenhuma carona ativa."
+            description="Toque no botão + para oferecer uma carona."
+          />
         ) : (
           activeRides.map((ride) => (
             <DriverRideCard
@@ -110,7 +129,7 @@ export default function Driver() {
       </ScrollView>
 
       <Pressable
-        onPress={() => setIsCreateModalVisible(true)}
+        onPress={openCreateModal}
         className="absolute right-6 bottom-6 w-16 h-16 bg-black rounded-full items-center justify-center shadow-lg shadow-black/40 active:scale-90 active:bg-black/70 transition-all z-10"
         accessibilityRole="button"
         accessibilityLabel="Criar nova carona"
@@ -128,14 +147,20 @@ export default function Driver() {
         }}
         onReject={(id) => respondToRequest(id, false)}
         isLoading={isRequestsLoading}
-        errorMessage={requestsError || actionError}
+        loadErrorMessage={requestsError}
+        onRetry={refetchRequests}
+        errorMessage={respondError}
         respondingRequestId={respondingRequestId}
       />
 
       <CreateRideModal
         isVisible={isCreateModalVisible}
-        onClose={() => setIsCreateModalVisible(false)}
+        onClose={closeCreateModal}
         onSubmit={handleCreateRide}
+        isSubmitting={isCreatingRide}
+        errorMessage={createError}
+        // Sem capacidade cadastrada (motoristas antigos), o modal usa o limite da API (8)
+        maxSeats={profile.vehicleTotalSeats ?? undefined}
       />
     </View>
   );

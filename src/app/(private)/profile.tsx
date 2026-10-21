@@ -1,4 +1,8 @@
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
+import { ErrorState } from "@/src/components/ui/ErrorState";
+import { LoadingState } from "@/src/components/ui/LoadingState";
 import { useProfile } from "@/src/hooks/useProfile";
+import { useRouter } from "expo-router";
 import {
   Car,
   ChevronRight,
@@ -8,20 +12,38 @@ import {
   LogOut,
   Mail,
   Palette,
+  Pencil,
   Phone,
   User,
+  Users,
 } from "lucide-react-native";
-import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 export default function Profile() {
-  const { profile, isLoading, signOut } = useProfile();
+  const { profile, isLoading, hasProfileData, error, refetch, signOut } =
+    useProfile();
+  const router = useRouter();
 
   return (
     <ScrollView
       className="flex-1 bg-[#FAF9F9]"
       contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          // Na primeira carga o LoadingState já indica o carregamento
+          refreshing={isLoading && hasProfileData}
+          onRefresh={refetch}
+          colors={["#E84855"]}
+          tintColor="#E84855"
+        />
+      }
     >
       <View className="items-center mb-8">
         <View className="w-28 h-28 bg-[#E84855] rounded-full items-center justify-center border-4 border-white shadow-md mb-4">
@@ -40,103 +62,141 @@ export default function Profile() {
         </View>
       </View>
 
-      <Text className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-3 ml-1">
-        Informações Pessoais
-      </Text>
-      <View className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-6 gap-4">
-        <View className="flex-row items-center gap-3">
-          <View className="bg-slate-50 p-2.5 rounded-xl">
-            <GraduationCap size={22} color="#E84855" />
-          </View>
-          <View className="flex-1 border-b border-slate-100 pb-3">
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-              Curso
-            </Text>
-            <Text className="text-[#040F0F] text-base font-semibold">
-              {profile.course}
-            </Text>
-          </View>
-        </View>
-
-        <View className="flex-row items-center gap-3">
-          <View className="bg-slate-50 p-2.5 rounded-xl">
-            <Mail size={22} color="#E84855" />
-          </View>
-          <View className="flex-1 border-b border-slate-100 pb-3">
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-              E-mail institucional
-            </Text>
-            <Text className="text-[#040F0F] text-base font-semibold">
-              {profile.email}
-            </Text>
-          </View>
-        </View>
-
-        <View className="flex-row items-center gap-3">
-          <View className="bg-slate-50 p-2.5 rounded-xl">
-            <Phone size={22} color="#E84855" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-              WhatsApp
-            </Text>
-            <Text className="text-[#040F0F] text-base font-semibold">
-              {profile.whatsApp}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {profile.isDriver && (
+      {!hasProfileData ? (
+        isLoading ? (
+          <LoadingState message="Carregando seu perfil..." />
+        ) : (
+          <ErrorState
+            message={error || "Não foi possível carregar os dados do seu perfil."}
+            onRetry={refetch}
+          />
+        )
+      ) : (
         <>
+          {/* Falha ao atualizar: mantém os dados já carregados e avisa acima deles */}
+          <ErrorBanner message={error} className="mb-6" />
+
           <Text className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-3 ml-1">
-            Meu Veículo
+            Informações Pessoais
           </Text>
           <View className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-6 gap-4">
             <View className="flex-row items-center gap-3">
-              <View className="bg-red-50 p-2.5 rounded-xl">
-                <Car size={22} color="#E84855" />
+              <View className="bg-slate-50 p-2.5 rounded-xl">
+                <GraduationCap size={22} color="#E84855" />
               </View>
               <View className="flex-1 border-b border-slate-100 pb-3">
                 <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                  Modelo
+                  Curso
                 </Text>
                 <Text className="text-[#040F0F] text-base font-semibold">
-                  {profile.vehicleModel}
+                  {profile.course}
                 </Text>
               </View>
             </View>
 
-            <View className="flex-row gap-4">
-              <View className="flex-1 flex-row items-center gap-3">
-                <View className="bg-red-50 p-2.5 rounded-xl">
-                  <Palette size={22} color="#E84855" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                    Cor
-                  </Text>
-                  <Text className="text-[#040F0F] text-base font-semibold">
-                    {profile.vehicleColor}
-                  </Text>
-                </View>
+            <View className="flex-row items-center gap-3">
+              <View className="bg-slate-50 p-2.5 rounded-xl">
+                <Mail size={22} color="#E84855" />
               </View>
+              <View className="flex-1 border-b border-slate-100 pb-3">
+                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  E-mail institucional
+                </Text>
+                <Text className="text-[#040F0F] text-base font-semibold">
+                  {profile.email}
+                </Text>
+              </View>
+            </View>
 
-              <View className="flex-1 flex-row items-center gap-3">
-                <View className="bg-red-50 p-2.5 rounded-xl">
-                  <Hash size={22} color="#E84855" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                    Placa
-                  </Text>
-                  <Text className="text-[#040F0F] text-base font-semibold uppercase">
-                    {profile.vehiclePlate}
-                  </Text>
-                </View>
+            <View className="flex-row items-center gap-3">
+              <View className="bg-slate-50 p-2.5 rounded-xl">
+                <Phone size={22} color="#E84855" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  WhatsApp
+                </Text>
+                <Text className="text-[#040F0F] text-base font-semibold">
+                  {profile.whatsApp}
+                </Text>
               </View>
             </View>
           </View>
+
+          {profile.isDriver && (
+            <>
+              <Text className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-3 ml-1">
+                Meu Veículo
+              </Text>
+              <View className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-6 gap-4">
+                <View className="flex-row items-center gap-3">
+                  <View className="bg-red-50 p-2.5 rounded-xl">
+                    <Car size={22} color="#E84855" />
+                  </View>
+                  <View className="flex-1 border-b border-slate-100 pb-3">
+                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      Modelo
+                    </Text>
+                    <Text className="text-[#040F0F] text-base font-semibold">
+                      {profile.vehicleModel}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row gap-4">
+                  <View className="flex-1 flex-row items-center gap-3">
+                    <View className="bg-red-50 p-2.5 rounded-xl">
+                      <Palette size={22} color="#E84855" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        Cor
+                      </Text>
+                      <Text className="text-[#040F0F] text-base font-semibold">
+                        {profile.vehicleColor}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-1 flex-row items-center gap-3">
+                    <View className="bg-red-50 p-2.5 rounded-xl">
+                      <Hash size={22} color="#E84855" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        Placa
+                      </Text>
+                      <Text className="text-[#040F0F] text-base font-semibold uppercase">
+                        {profile.vehiclePlate}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View className="flex-row items-center gap-3 border-t border-slate-100 pt-3">
+                  <View className="bg-red-50 p-2.5 rounded-xl">
+                    <Users size={22} color="#E84855" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      Vagas para passageiros
+                    </Text>
+                    <Text className="text-[#040F0F] text-base font-semibold">
+                      {profile.vehicleTotalSeats ?? "Não informado"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+
+          <Pressable
+            onPress={() => router.push("/edit-profile")}
+            className="mb-6 flex-row items-center justify-center rounded-xl border border-[#E84855] bg-white p-4"
+          >
+            <Pencil size={20} color="#E84855" />
+            <Text className="ml-2 font-bold text-[#E84855]">Editar perfil</Text>
+          </Pressable>
         </>
       )}
 

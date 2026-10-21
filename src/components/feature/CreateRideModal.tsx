@@ -1,3 +1,4 @@
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
 import type { RideFormData } from "@/src/hooks/apiTypes";
 import { Clock, LocateFixed, MapPin, Users, X } from "lucide-react-native";
 import React, { useState } from "react";
@@ -21,7 +22,12 @@ export interface CreateRideModalProps {
   onSubmit: (data: RideFormData) => boolean | void | Promise<boolean | void>;
   isSubmitting?: boolean;
   errorMessage?: string | null;
+  // Capacidade do veículo do motorista; a API aceita no máximo 8 vagas por carona
+  maxSeats?: number;
 }
+
+const MIN_SEATS = 1;
+const MAX_SEATS = 8;
 
 export function CreateRideModal({
   isVisible,
@@ -29,6 +35,7 @@ export function CreateRideModal({
   onSubmit,
   isSubmitting = false,
   errorMessage,
+  maxSeats = MAX_SEATS,
 }: CreateRideModalProps) {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -54,14 +61,22 @@ export function CreateRideModal({
     }
   };
 
+  const seatsLimit = Math.min(maxSeats, MAX_SEATS);
+  const spotsNumber = parseInt(spots, 10);
+  const isSpotsValid = spotsNumber >= MIN_SEATS && spotsNumber <= seatsLimit;
+
+  const handleSpotsChange = (text: string) => {
+    setSpots(text.replace(/\D/g, ""));
+  };
+
   const handleCreate = async () => {
-    if (!origin || !destination || !time || !spots || isSubmitting) return;
+    if (!origin || !destination || !time || !isSpotsValid || isSubmitting) return;
 
     const shouldClose = await onSubmit({
       origin,
       destination,
       time,
-      spots: parseInt(spots, 10),
+      spots: spotsNumber,
     });
 
     if (shouldClose === false) return;
@@ -70,20 +85,26 @@ export function CreateRideModal({
     onClose();
   };
 
-  const canSubmit = Boolean(origin && destination && time && spots) && !isSubmitting;
+  // Enquanto a carona é enviada, o modal não pode ser fechado
+  const handleClose = () => {
+    if (isSubmitting) return;
+    onClose();
+  };
+
+  const canSubmit = Boolean(origin && destination && time) && isSpotsValid && !isSubmitting;
 
   return (
     <Modal
       visible={isVisible}
       transparent={true}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <Pressable className="flex-1 justify-end bg-black/50" onPress={onClose}>
+        <Pressable className="flex-1 justify-end bg-black/50" onPress={handleClose}>
           <Pressable
             className="bg-white rounded-t-[32px] p-6 max-h-[90%]"
             onPress={(event) => event.stopPropagation()}
@@ -93,7 +114,7 @@ export function CreateRideModal({
                 Criar Carona
               </Text>
               <Pressable
-                onPress={onClose}
+                onPress={handleClose}
                 className="bg-slate-100 p-2 rounded-full active:bg-slate-200"
               >
                 <X size={24} color="#64748b" strokeWidth={2.5} />
@@ -102,13 +123,7 @@ export function CreateRideModal({
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="gap-4 pb-4">
-                {errorMessage ? (
-                  <View className="bg-rose-100 border border-rose-300 p-3 rounded-xl">
-                    <Text className="text-rose-700 text-sm font-bold text-center">
-                      {errorMessage}
-                    </Text>
-                  </View>
-                ) : null}
+                <ErrorBanner message={errorMessage} />
 
                 <View>
                   <Text className="text-slate-500 font-bold mb-1 ml-1">
@@ -172,7 +187,7 @@ export function CreateRideModal({
                       <Users size={20} color="#94a3b8" />
                       <TextInput
                         value={spots}
-                        onChangeText={setSpots}
+                        onChangeText={handleSpotsChange}
                         placeholder="Ex: 4"
                         keyboardType="number-pad"
                         maxLength={1}
@@ -181,6 +196,11 @@ export function CreateRideModal({
                         editable={!isSubmitting}
                       />
                     </View>
+                    <Text
+                      className={`text-xs font-semibold mt-1 ml-1 ${spots && !isSpotsValid ? "text-rose-600" : "text-slate-400"}`}
+                    >
+                      De {MIN_SEATS} a {seatsLimit} vagas
+                    </Text>
                   </View>
                 </View>
               </View>

@@ -16,11 +16,8 @@ export function usePassengerRideRequests() {
   );
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadRequests = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setActionError(null);
-
+  // Busca os dados e só altera o estado depois da resposta, por isso pode rodar direto no useEffect
+  const fetchRequests = useCallback(async () => {
     try {
       const response =
         await api.get<RideRequestResponseDto[]>("/api/requests/me");
@@ -43,6 +40,14 @@ export function usePassengerRideRequests() {
     }
   }, []);
 
+  // Recarrega mostrando o carregamento (pull-to-refresh, "Tentar novamente" e após ações)
+  const loadRequests = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    setActionError(null);
+    return fetchRequests();
+  }, [fetchRequests]);
+
   const cancelRequest = useCallback(
     async (requestId: string) => {
       setCancelingRequestId(requestId);
@@ -57,12 +62,9 @@ export function usePassengerRideRequests() {
           "Não foi possível cancelar a solicitação.",
         );
 
+        // A API não lista solicitações canceladas, então ela sai da lista (e a carona volta ao feed)
         setRequests((current) =>
-          current.map((request) =>
-            request.id === requestId
-              ? { ...request, status: "Cancelada" }
-              : request,
-          ),
+          current.filter((request) => request.id !== requestId),
         );
         return true;
       } catch (err) {
@@ -79,9 +81,12 @@ export function usePassengerRideRequests() {
     [],
   );
 
+  // No carregamento inicial o estado já começa como "carregando"
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    // A regra não acompanha o await: fetchRequests só altera o estado depois da resposta da API
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchRequests();
+  }, [fetchRequests]);
 
   return {
     requests,

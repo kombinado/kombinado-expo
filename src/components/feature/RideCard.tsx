@@ -6,7 +6,7 @@ import {
   MapPin,
 } from "lucide-react-native";
 import React from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
 
 export interface RideCardProps {
   driverName?: string;
@@ -35,6 +35,25 @@ export function RideCard({
   onRequestRide,
   isRequesting = false,
 }: RideCardProps) {
+
+  const openDestinationInMap = async() =>{
+    const address = destination.trim();
+
+    if(!address){
+      return;
+    }
+    
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+
+    try{
+      await Linking.openURL(url);
+    }catch(error){
+      console.error("Erro ao abrir o destino no mapa: ", error);
+    }
+  };
+
+
   const vehicleInfo = [carModel, carColor, carPlate].filter(Boolean);
 
   return (
@@ -111,9 +130,21 @@ export function RideCard({
         </View>
 
         <View className="flex-row gap-3 items-start">
-          <View className="items-center mt-1">
-            <LocateFixed size={22} color="#FFF" strokeWidth={2.5} />
-          </View>
+
+          <Pressable
+            onPress={openDestinationInMap}
+            accessibilityRole="button"
+            accessibilityLabel={`Open destination in Google Maps: ${destination}`}
+            accessibilityHint="Opens the destination in Google Maps or your browser"
+            className="items-center justify-center mt-1 w-11 h-11 rounded-full bg-white shadow-sm active:opacity-80"
+          >
+           <LocateFixed
+              size={22}
+              color="#E84855"
+              strokeWidth={2.5}
+            />
+          </Pressable>
+          
           <View className="flex-col flex-1">
             <Text className="text-red-100 text-xs font-bold uppercase tracking-widest mb-0.5">
               Destino

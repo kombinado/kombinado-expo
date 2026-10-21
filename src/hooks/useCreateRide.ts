@@ -8,7 +8,7 @@ import {
   ensureApiSuccess,
   getErrorMessage,
 } from "@/src/hooks/apiHookUtils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 interface UseCreateRideOptions {
   onSuccess?: (ride: RideResponseDto) => void | Promise<void>;
@@ -33,7 +33,7 @@ export function useCreateRide(options: UseCreateRideOptions = {}) {
       await options.onSuccess?.(ride);
       return true;
     } catch (err) {
-      console.error("Erro ao criar carona:", err);
+      console.log("Aviso ao criar carona:", err);
       setError(
         getErrorMessage(
           err,
@@ -46,9 +46,12 @@ export function useCreateRide(options: UseCreateRideOptions = {}) {
     }
   };
 
+  const clearError = useCallback(() => setError(null), []);
+
   return {
     createRide,
     isLoading,
     error,
+    clearError,
   };
 }

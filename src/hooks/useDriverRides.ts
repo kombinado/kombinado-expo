@@ -14,10 +14,8 @@ export function useDriverRides() {
   const [cancelingRideId, setCancelingRideId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadRides = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
+  // Busca os dados e só altera o estado depois da resposta, por isso pode rodar direto no useEffect
+  const fetchRides = useCallback(async () => {
     try {
       const response = await api.get<RideResponseDto[]>(
         "/api/Rides/me/driving",
@@ -40,6 +38,14 @@ export function useDriverRides() {
       setIsLoading(false);
     }
   }, []);
+
+  // Recarrega mostrando o carregamento (pull-to-refresh, "Tentar novamente" e após ações)
+  const loadRides = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    setActionError(null);
+    return fetchRides();
+  }, [fetchRides]);
 
   const cancelRide = useCallback(async (rideId: string) => {
     setCancelingRideId(rideId);
@@ -67,9 +73,12 @@ export function useDriverRides() {
     }
   }, []);
 
+  // No carregamento inicial o estado já começa como "carregando"
   useEffect(() => {
-    loadRides();
-  }, [loadRides]);
+    // A regra não acompanha o await: fetchRides só altera o estado depois da resposta da API
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchRides();
+  }, [fetchRides]);
 
   return {
     rides,
