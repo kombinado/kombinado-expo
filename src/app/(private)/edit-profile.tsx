@@ -1,4 +1,5 @@
 import { api } from "@/services/api";
+import { ErrorBanner } from "@/src/components/ui/ErrorBanner";
 import { ErrorState } from "@/src/components/ui/ErrorState";
 import { LoadingState } from "@/src/components/ui/LoadingState";
 import { ensureApiSuccess, getErrorMessage } from "@/src/hooks/apiHookUtils";
@@ -121,22 +122,22 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
     initialValues.vehicleTotalSeats,
   );
   const [isSaving, setIsSaving] = useState(false);
+  // Erro de validação ou da API, mostrado acima do botão de salvar (mesmo padrão dos modais)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
     const cleanWhatsApp = whatsApp.replace(/\D/g, "");
     const cleanPlate = vehiclePlate.trim().toUpperCase().replace(/-/g, "");
+    setErrorMessage(null);
 
     // Validação dos dados pessoais
     if (!name.trim() || !course.trim()) {
-      Alert.alert("Atenção", "Preencha seu nome e curso.");
+      setErrorMessage("Preencha seu nome e curso.");
       return;
     }
 
     if (!/^\d{10,11}$/.test(cleanWhatsApp)) {
-      Alert.alert(
-        "Atenção",
-        "Informe um WhatsApp com DDD, contendo 10 ou 11 números.",
-      );
+      setErrorMessage("Informe um WhatsApp com DDD, contendo 10 ou 11 números.");
       return;
     }
 
@@ -157,7 +158,9 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
         (!/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(cleanPlate) &&
           !/^[A-Z]{3}\d{4}$/.test(cleanPlate))
       ) {
-        Alert.alert("Atenção", "Confira o modelo, a cor e a placa do veículo.");
+        setErrorMessage(
+          "Confira o modelo, a cor e a placa do veículo (formato ABC1234 ou ABC1D23).",
+        );
         return;
       }
 
@@ -167,8 +170,7 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
         seats < 1 ||
         seats > 8
       ) {
-        Alert.alert(
-          "Atenção",
+        setErrorMessage(
           "A quantidade de lugares deve ser um número inteiro entre 1 e 8.",
         );
         return;
@@ -204,8 +206,7 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
       Alert.alert("Sucesso", "Perfil atualizado!");
       router.replace("./profile");
     } catch (error) {
-      Alert.alert(
-        "Erro ao salvar",
+      setErrorMessage(
         getErrorMessage(
           error,
           "Não foi possível atualizar seu perfil. Tente novamente.",
@@ -286,7 +287,8 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
             value={vehiclePlate}
             onChangeText={(value) => setVehiclePlate(value.toUpperCase())}
             placeholder="Ex.: ABC1D23"
-            maxLength={7}
+            // 8 para aceitar o hífen (ABC-1234); ele é removido antes de enviar
+            maxLength={8}
             autoCapitalize="characters"
             className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
             placeholderTextColor="#888888"
@@ -306,6 +308,8 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
           />
         </View>
       )}
+
+      <ErrorBanner message={errorMessage} className="mb-3" />
 
       <Pressable
         onPress={handleSave}
