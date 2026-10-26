@@ -94,7 +94,8 @@ export default function AppLayout() {
       <Tabs.Screen
         name="edit-profile"
         options={{
-          href: null,
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: "none" },
           headerShown: false,
         }}
       />
