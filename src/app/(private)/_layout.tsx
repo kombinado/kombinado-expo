@@ -6,7 +6,7 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AppLayout() {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
 
   const insets = useSafeAreaInsets();
 

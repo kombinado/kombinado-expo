@@ -91,7 +91,7 @@ export default function Driver() {
         refreshControl={
           <RefreshControl
             refreshing={isRidesLoading}
-            onRefresh={refetchRides}
+            onRefresh={() => { void refetchRides(); }}
             colors={["#E84855"]}
             tintColor="#E84855"
           />
