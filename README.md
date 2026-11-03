@@ -42,8 +42,8 @@ O projeto adota o padrão de **Custom Hooks** para abstrair a comunicação com 
 
 ## 🛠️ Tecnologias
 
-* [Expo](https://expo.dev) SDK 57
-* [React Native](https://reactnative.dev) 0.86
+* [Expo](https://expo.dev) SDK 58
+* [React Native](https://reactnative.dev) 0.88
 * [NativeWind](https://www.nativewind.dev/) (Integração com Tailwind CSS)
 * [Expo Router](https://docs.expo.dev/router/introduction) (Roteamento moderno baseado em arquivos)
 * [Lucide React Native](https://lucide.dev/) (Ícones modernos)
@@ -53,8 +53,8 @@ O projeto adota o padrão de **Custom Hooks** para abstrair a comunicação com 
 
 ## 📋 Pré-requisitos
 
-* **Node.js** `20.19.4` ou mais recente, `22.13` ou mais recente, ou `24.3` ou mais recente (exigência do React Native 0.86). Confira com `node -v`.
-* **Expo Go** atualizado no celular, compatível com o **SDK 57**. Se o Expo Go disser *"Project is incompatible with this version of Expo Go"*, atualize o app pela loja.
+* **Node.js** `22.13` ou mais recente na linha 22, `24.3` ou mais recente na linha 24, ou linha 26 ou posterior. Confira com `node -v`.
+* **Expo Go** compatível com o **SDK 58** no celular. No Android, selecione SDK 58 em [expo.dev/go](https://expo.dev/go) caso a versão da loja ainda seja antiga. No iPhone físico, confira a disponibilidade do SDK 58; se a loja ainda não o oferecer, será necessário um development build.
 * **Docker** (apenas se for usar a API local).
 * Celular e computador na **mesma rede Wi-Fi** (ou use o modo túnel, veja abaixo).
 
@@ -108,7 +108,7 @@ O endereço depende de onde o app está rodando (os exemplos usam a porta `8080`
 Após configurar o `.env`, instale as dependências e inicie o servidor do Expo limpando o cache para garantir que a variável de ambiente foi lida:
 
 ```bash
-npm install
+npm ci
 npx expo start -c
 ```
 
@@ -157,7 +157,7 @@ npx tsc --noEmit
 
 | Sintoma | Solução |
 |---|---|
-| *"Project is incompatible with this version of Expo Go"* | Atualize o Expo Go pela loja (o projeto usa o SDK 57). |
+| *"Project is incompatible with this version of Expo Go"* | Instale o Expo Go compatível com SDK 58 em [expo.dev/go](https://expo.dev/go) no Android. No iPhone físico, use um development build se a versão da loja ainda não suportar SDK 58. |
 | O celular continua mostrando código antigo | Rode `npx expo start -c`. Se persistir, apague os dados do app Expo Go (Configurações → Apps → Expo Go → Armazenamento → Limpar dados). |
 | *Network request failed* | Confira o `EXPO_PUBLIC_API_URL`: use `HTTP` na API local, o IP correto da máquina e a porta certa (`8080` no Docker, `5198` no `dotnet run`). Depois rode com `-c`. |
 | O QR Code não abre o projeto | Confira se celular e computador estão na mesma Wi-Fi, libere a porta `8081` no firewall ou use `--tunnel`. |

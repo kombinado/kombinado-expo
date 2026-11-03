@@ -22,7 +22,7 @@ function NavigationGuard() {
       // Redireciona usuários logados tentando acessar área de auth para a home
       router.replace("/home");
     }
-  }, [userToken, isLoading, segments]);
+  }, [userToken, isLoading, segments, router]);
 
   if (isLoading) {
     return (

@@ -6,7 +6,7 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AppLayout() {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
 
   const insets = useSafeAreaInsets();
 
@@ -94,7 +94,8 @@ export default function AppLayout() {
       <Tabs.Screen
         name="edit-profile"
         options={{
-          href: null,
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: "none" },
           headerShown: false,
         }}
       />

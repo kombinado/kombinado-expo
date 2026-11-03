@@ -39,7 +39,7 @@ export default function Profile() {
         <RefreshControl
           // Na primeira carga o LoadingState já indica o carregamento
           refreshing={isLoading && hasProfileData}
-          onRefresh={refetch}
+          onRefresh={() => { void refetch(); }}
           colors={["#E84855"]}
           tintColor="#E84855"
         />
