@@ -1,8 +1,9 @@
 import "@/global.css";
 import { AuthProvider } from "@/src/context/auth/AuthProvider";
 import { useAuth } from "@/src/hooks/useAuth";
+import { colors } from '@/src/theme/colors';
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 function NavigationGuard() {
@@ -26,8 +27,8 @@ function NavigationGuard() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#E84855] justify-center items-center">
-        <ActivityIndicator size="large" color="#FAF9F9" />
+      <View className="flex-1 bg-background justify-center items-center">
+        <ActivityIndicator size="large" color={colors.text['links']} />
       </View>
     );
   }

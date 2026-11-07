@@ -1,19 +1,20 @@
 import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { useAuth } from "@/src/hooks/useAuth";
+import { colors } from '@/src/theme/colors';
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
-  View,
-  Alert,
-  Platform
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -112,11 +113,11 @@ export default function SignUp() {
     }
   };
 
-  const inputClassName = "w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg";
+  const inputClassName = "w-full bg-input font-semibold text-text-light-primary placeholder:text-text-light-secondary px-4 py-4 rounded-2xl border-2 border-transparent focus:border-text-links focus:bg-input text-lg";
 
   return (
     <AuthScreenWrapper>
-      <SafeAreaView className="flex-1 bg-[#E84855]">
+      <SafeAreaView className="flex-1 bg-background">
         <KeyboardAvoidingView 
           behavior={Platform.OS === "ios" ? "padding" : undefined} 
           className="flex-1 px-8 py-4"
@@ -136,16 +137,16 @@ export default function SignUp() {
             </View>
 
             {/* Alternador de Perfil */}
-            <View className="flex-row w-full h-12 bg-white rounded-xl overflow-hidden p-1">
+            <View className="flex-row w-full h-12 bg-card rounded-xl overflow-hidden p-1">
               <Pressable
                 onPress={() => !isSubmitting && setIsDriver(false)}
                 className={`w-1/2 h-full items-center justify-center rounded-lg ${
-                  !isDriver ? "bg-[#E84855]" : "bg-transparent"
+                  !isDriver ? "bg-button" : "bg-transparent"
                 } `}
               >
                 <Text
                   className={`font-bold text-base ${
-                    !isDriver ? "text-white" : "text-[#E84855]"
+                    !isDriver ? "text-text-dark" : "text-text-light-primary"
                   }`}
                 >
                   Passageiro
@@ -154,12 +155,12 @@ export default function SignUp() {
               <Pressable
                 onPress={() => !isSubmitting && setIsDriver(true)}
                 className={`w-1/2 h-full items-center justify-center rounded-lg ${
-                  isDriver ? "bg-[#E84855]" : "bg-transparent"
+                  isDriver ? "bg-button" : "bg-transparent"
                 } `}
               >
                 <Text
                   className={`font-bold text-base ${
-                    isDriver ? "text-white" : "text-[#E84855]"
+                    isDriver ? "text-text-dark" : "text-text-light-primary"
                   }`}
                 >
                   Motorista
@@ -168,12 +169,12 @@ export default function SignUp() {
             </View>
 
             {/* Formulário */}
-            <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[30px] px-[20px] gap-y-6 shadow-lg">
+            <View className="bg-card flex-col rounded-[12px] py-[30px] px-[20px] gap-y-6 shadow-lg">
               <View className="gap-2">
-                <Text className="text-2xl text-wrap font-bold text-[#040F0F] ">
+                <Text className="text-2xl text-wrap font-bold text-text-light-primary ">
                   Participe do Kombinado
                 </Text>
-                <Text className="text-base text-wrap text-[#040F0F] ">
+                <Text className="text-base text-wrap text-text-light-primary ">
                   Tenha acesso à maior comunidade universitária de caronas.
                 </Text>
               </View>
@@ -194,7 +195,6 @@ export default function SignUp() {
                   placeholder="Nome Completo"
                   value={name}
                   onChangeText={setName}
-                  placeholderTextColor="#A1A1AA"
                   keyboardType="default"
                   autoCapitalize="words"
                   editable={!isSubmitting}
@@ -207,7 +207,6 @@ export default function SignUp() {
                   placeholder="Email institucional"
                   value={email}
                   onChangeText={setEmail}
-                  placeholderTextColor="#A1A1AA"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   editable={!isSubmitting}
@@ -220,7 +219,6 @@ export default function SignUp() {
                   placeholder="WhatsApp (com DDD)"
                   value={whatsApp}
                   onChangeText={handleWhatsAppChange}
-                  placeholderTextColor="#A1A1AA"
                   keyboardType="phone-pad"
                   autoCapitalize="none"
                   editable={!isSubmitting}
@@ -233,7 +231,6 @@ export default function SignUp() {
                   placeholder="Curso"
                   value={course}
                   onChangeText={setCourse}
-                  placeholderTextColor="#A1A1AA"
                   keyboardType="default"
                   autoCapitalize="words"
                   editable={!isSubmitting}
@@ -247,7 +244,6 @@ export default function SignUp() {
                     placeholder="Senha"
                     value={password}
                     onChangeText={setPassword}
-                    placeholderTextColor="#A1A1AA"
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     editable={!isSubmitting}
@@ -260,9 +256,9 @@ export default function SignUp() {
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     {showPassword ? (
-                      <EyeOff size={24} color="#A1A1AA" />
+                      <EyeOff size={24} color={colors.text['light-secondary']} />
                     ) : (
-                      <Eye size={24} color="#A1A1AA" />
+                      <Eye size={24} color={colors.text['light-secondary']} />
                     )}
                   </Pressable>
                 </View>
@@ -270,8 +266,8 @@ export default function SignUp() {
 
               {/* Se for motorista, exibe os campos do veículo */}
               {isDriver && (
-                <View className="flex-col gap-y-4 border-t border-gray-200 pt-4">
-                  <Text className="text-center font-bold text-[#E84855] text-base uppercase tracking-wider">
+                <View className="flex-col gap-y-4 border-t border-text-light-secondary pt-8">
+                  <Text className="text-center font-bold text-text-links text-base uppercase tracking-wider">
                     Informações do Veículo
                   </Text>
 
@@ -280,7 +276,6 @@ export default function SignUp() {
                     placeholder="Modelo do Veículo"
                     value={vehicleModel}
                     onChangeText={setVehicleModel}
-                    placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="words"
                     editable={!isSubmitting}
@@ -293,7 +288,6 @@ export default function SignUp() {
                     placeholder="Cor"
                     value={vehicleColor}
                     onChangeText={setVehicleColor}
-                    placeholderTextColor="#A1A1AA"
                     keyboardType="default"
                     autoCapitalize="words"
                     editable={!isSubmitting}
@@ -308,7 +302,6 @@ export default function SignUp() {
                       placeholder="Placa"
                       value={vehiclePlate}
                       onChangeText={setVehiclePlate}
-                      placeholderTextColor="#A1A1AA"
                       keyboardType="default"
                       autoCapitalize="characters"
                       autoCorrect={false}
@@ -317,7 +310,7 @@ export default function SignUp() {
                       accessible={true}
                       accessibilityLabel="Placa do carro, no formato ABC1234 ou ABC1D23"
                     />
-                    <Text className="text-xs font-semibold text-slate-400 mt-1 ml-1">
+                    <Text className="text-xs font-semibold text-text-light-secondary text-slate-400 mt-1 ml-1">
                       Formato ABC1234 ou ABC1D23
                     </Text>
                   </View>
@@ -328,14 +321,13 @@ export default function SignUp() {
                       placeholder="Vagas no carro"
                       value={vehicleTotalSeats}
                       onChangeText={(text) => setVehicleTotalSeats(text.replace(/\D/g, ""))}
-                      placeholderTextColor="#A1A1AA"
                       keyboardType="number-pad"
                       maxLength={1}
                       editable={!isSubmitting}
                       accessible={true}
                       accessibilityLabel="Vagas para passageiros no carro, de 1 a 8"
                     />
-                    <Text className="text-xs font-semibold text-slate-400 mt-1 ml-1">
+                    <Text className="text-xs font-semibold text-text-light-secondary text-slate-400 mt-1 ml-1">
                       De 1 a 8 passageiros, sem contar você
                     </Text>
                   </View>
@@ -344,7 +336,7 @@ export default function SignUp() {
 
               {/* Botão de Envio */}
               <Pressable
-                className={`mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95 ${
+                className={`mt-4 w-full bg-button py-5 rounded-2xl items-center shadow-md active:bg-button/70 active:scale-95 ${
                   isSubmitting ? "opacity-60" : ""
                 }`}
                 onPress={handleSignup}
@@ -354,9 +346,9 @@ export default function SignUp() {
                 accessibilityLabel="Botão Cadastrar"
               >
                 {isSubmitting ? (
-                  <ActivityIndicator color="#FAF9F9" />
+                  <ActivityIndicator color={colors.text['light-primary']} />
                 ) : (
-                  <Text className="text-white text-xl font-extrabold tracking-widest">
+                  <Text className="text-text-dark text-xl font-extrabold tracking-widest">
                     Cadastrar
                   </Text>
                 )}
@@ -364,12 +356,12 @@ export default function SignUp() {
             </View>
 
             <View className="flex-row self-center">
-              <Text className="mr-1 text-[#FAF9F9]">Já possui uma conta?</Text>
+              <Text className="mr-1 text-text-light-secondary">Já possui uma conta?</Text>
               <Pressable
                 onPress={() => router.push("/login")}
                 disabled={isSubmitting}
               >
-                <Text className="text-[#FAF9F9] font-bold">Entrar</Text>
+                <Text className="text-text-links font-bold">Entrar</Text>
               </Pressable>
             </View>
           </ScrollView>
