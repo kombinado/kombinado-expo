@@ -1,3 +1,4 @@
+import { colors as themeColors } from '@/src/theme/colors';
 import {
   ArrowDownFromLine,
   Calendar,
@@ -41,20 +42,20 @@ export function RequestedRideCard({
   isCancelling = false,
 }: RequestedRideCardProps) {
   const statusConfig = {
-    aceita: { label: "ACEITA", color: "text-green-600" },
-    pendente: { label: "PENDENTE", color: "text-amber-500" },
-    negada: { label: "NEGADA", color: "text-slate-400" },
+    aceita: { label: "ACEITA", color: "text-success-secondary" },
+    pendente: { label: "PENDENTE", color: "text-pending" },
+    negada: { label: "NEGADA", color: "text-error-secondary" },
   };
 
   const currentStatus = statusConfig[status];
   const vehicleInfo = [carModel, carColor, carPlate].filter(Boolean);
 
   return (
-    <View className="flex bg-[#E84855] rounded-xl px-4 py-6 gap-6 shadow-sm mb-4">
+    <View className="flex bg-card rounded-xl px-4 py-6 gap-6 shadow-sm mb-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-col flex-1 mr-4">
           <Text
-            className="text-2xl font-semibold text-white mb-1"
+            className="text-2xl font-semibold text-text-light-primary mb-1"
             numberOfLines={1}
           >
             {driverName}
@@ -65,10 +66,10 @@ export function RequestedRideCard({
               {vehicleInfo.map((info, index) => (
                 <React.Fragment key={`${info}-${index}`}>
                   {index > 0 ? (
-                    <View className="w-1 h-1 bg-red-200/50 rounded-full" />
+                    <View className="w-1 h-1 bg-text-light-secondary rounded-full" />
                   ) : null}
                   <Text
-                    className={`text-sm text-red-100 ${
+                    className={`text-sm text-text-light-primary ${
                       info === carPlate
                         ? "font-bold uppercase tracking-wider"
                         : "font-medium"
@@ -84,7 +85,7 @@ export function RequestedRideCard({
 
         {/* No Android, textos em negrito com letterSpacing podem ter a última letra cortada.
             A largura mínima e o texto esticado e centralizado deixam uma folga depois da palavra. */}
-        <View className="bg-white px-4 py-3 rounded-xl justify-center shadow-sm min-w-[120px]">
+        <View className="bg-text-light-primary px-4 py-3 rounded-xl justify-center shadow-sm min-w-[120px]">
           <Text
             className={`self-stretch text-center text-lg font-black ${currentStatus.color}`}
           >
@@ -93,48 +94,48 @@ export function RequestedRideCard({
         </View>
       </View>
 
-      <View className="flex-row gap-6 bg-white/10 p-3 rounded-xl">
+      <View className="flex-row gap-6 bg-input p-3 rounded-xl">
         <View className="flex-row items-center flex-1 justify-center">
-          <Calendar size={20} color="#FFF" strokeWidth={2.5} />
-          <Text className="ml-2 text-lg text-white font-bold">{date}</Text>
+          <Calendar size={20} color={themeColors.text['light-primary']} strokeWidth={2.5} />
+          <Text className="ml-2 text-lg text-text-light-primary font-bold">{date}</Text>
         </View>
 
-        <View className="w-[2px] bg-white/20 rounded-full" />
+        <View className="w-[2px] bg-text-light-secondary rounded-full" />
 
         <View className="flex-row items-center flex-1 justify-center">
-          <Clock size={20} color="#FFF" strokeWidth={2.5} />
-          <Text className="ml-2 text-lg text-white font-bold">{time}</Text>
+          <Clock size={20} color={themeColors.text['light-primary']} strokeWidth={2.5} />
+          <Text className="ml-2 text-lg text-text-light-primary font-bold">{time}</Text>
         </View>
       </View>
 
       <View className="flex-col gap-3 pl-2">
         <View className="flex-row gap-3 items-start">
           <View className="items-center mt-1">
-            <MapPin size={22} color="#FFF" strokeWidth={2.5} />
+            <MapPin size={22} color={themeColors.text['light-primary']} strokeWidth={2.5} />
           </View>
           <View className="flex-col flex-1">
-            <Text className="text-red-100 text-xs font-bold uppercase tracking-widest mb-0.5">
+            <Text className="text-text-links text-xs font-bold uppercase tracking-widest mb-0.5">
               Origem
             </Text>
-            <Text className="text-white text-xl font-bold leading-tight">
+            <Text className="text-text-light-primary text-xl font-bold leading-tight">
               {origin}
             </Text>
           </View>
         </View>
 
         <View className="pl-[2px]">
-          <ArrowDownFromLine size={18} color="#FFB5B5" strokeWidth={2.5} />
+          <ArrowDownFromLine size={18} color={themeColors.text['light-secondary']} strokeWidth={2.5} />
         </View>
 
         <View className="flex-row gap-3 items-start">
           <View className="items-center mt-1">
-            <LocateFixed size={22} color="#FFF" strokeWidth={2.5} />
+            <LocateFixed size={22} color={themeColors.text['light-primary']} strokeWidth={2.5} />
           </View>
           <View className="flex-col flex-1">
-            <Text className="text-red-100 text-xs font-bold uppercase tracking-widest mb-0.5">
+            <Text className="text-text-links text-xs font-bold uppercase tracking-widest mb-0.5">
               Destino
             </Text>
-            <Text className="text-white text-xl font-bold leading-tight">
+            <Text className="text-text-light-primary text-xl font-bold leading-tight">
               {destination}
             </Text>
           </View>
@@ -145,10 +146,10 @@ export function RequestedRideCard({
         {status === "aceita" && canContactDriver ? (
           <Pressable
             onPress={onWhatsAppPress}
-            className="w-full bg-[#25D366] py-3.5 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-[#20b858] active:scale-95 transition-all"
+            className="w-full bg-button py-3.5 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-button/70 active:scale-95 transition-all"
           >
-            <MessageCircle size={22} color="#FFF" strokeWidth={2.5} />
-            <Text className="text-white text-lg font-black tracking-wider">
+            <MessageCircle size={22} color={themeColors.text.dark} strokeWidth={2.5} />
+            <Text className="text-text-dark text-lg font-black tracking-wider">
               Falar no WhatsApp
             </Text>
           </Pressable>
@@ -156,15 +157,15 @@ export function RequestedRideCard({
 
         <Pressable
           onPress={onCancelRequest}
-          className={`w-full bg-[#040F0F] py-3.5 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-[#040F0F]/80 active:scale-95 transition-all ${
+          className={`w-full bg-button-cancel py-3.5 rounded-xl flex-row items-center justify-center gap-2 shadow-sm active:bg-button-cancel/70 active:scale-95 transition-all ${
             isCancelling ? "opacity-70" : ""
           }`}
           disabled={isCancelling}
         >
           {isCancelling ? (
-            <ActivityIndicator color="#FFF" />
+            <ActivityIndicator color={themeColors.text['button-cancel']} />
           ) : (
-            <Text className="text-white text-lg font-black tracking-wider">
+            <Text className="text-text-button-cancel text-lg font-black tracking-wider">
               Cancelar Solicitação
             </Text>
           )}

@@ -1,5 +1,6 @@
+import { colors as themeColors } from '@/src/theme/colors';
 import { Search, X } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Pressable, TextInput, TextInputProps, View } from "react-native";
 
 interface SearchBarProps extends TextInputProps {
@@ -17,11 +18,11 @@ export function SearchBar({
 
   const isActive = isFocused || value.length > 0;
 
-  const bgColor = isActive ? "bg-[#FAF9F9]" : "bg-[#E84855]";
-  const borderColor = isActive ? "border-[#E84855]" : "border-transparent";
-  const iconColor = isActive ? "#E84855" : "#FFF";
-  const textColor = isActive ? "text-[#040F0F]" : "text-white";
-  const placeholderColor = isActive ? "#94a3b8" : "#FAF9F9";
+  const bgColor = isActive ? "bg-input" : "bg-button";
+  const borderColor = isActive ? "border-text-links" : "border-transparent";
+  const iconColor = isActive ? themeColors.text.links : themeColors.text.dark;
+  const textColor = isActive ? "text-text-light-primary" : "text-text-light-primary";
+  const placeholderColor = isActive ? themeColors.text['light-secondary'] : themeColors.text.dark;
 
   return (
     <View

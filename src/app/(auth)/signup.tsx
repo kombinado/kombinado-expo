@@ -181,8 +181,8 @@ export default function SignUp() {
 
               {/* Banner de Erro */}
               {errorMessage ? (
-                <View className="bg-rose-100 border border-rose-400 p-4 rounded-xl">
-                  <Text className="text-rose-800 font-bold text-center text-sm">
+                <View className="bg-error-primary border border-error-secondary p-4 rounded-xl">
+                  <Text className="text-error-secondary font-bold text-center text-sm">
                     {errorMessage}
                   </Text>
                 </View>

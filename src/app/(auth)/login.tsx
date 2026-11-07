@@ -78,8 +78,8 @@ export default function Login() {
 
             {/* Banner de Sucesso (Se vindo de Cadastro) */}
             {successSignup === "true" && (
-              <View className="bg-emerald-100 border border-emerald-400 p-4 rounded-xl">
-                <Text className="text-emerald-800 font-bold text-center text-sm">
+              <View className="bg-success-primary border border-success-secondary p-4 rounded-xl">
+                <Text className="text-success-secondary font-bold text-center text-sm">
                   Conta cadastrada com sucesso! Faça seu login abaixo.
                 </Text>
               </View>
@@ -87,8 +87,8 @@ export default function Login() {
 
             {/* Banner de Erro */}
             {errorMessage ? (
-              <View className="bg-rose-100 border border-rose-400 p-4 rounded-xl">
-                <Text className="text-rose-800 font-bold text-center text-sm">
+              <View className="bg-error-primary border border-error-secondary p-4 rounded-xl">
+                <Text className="text-error-secondary font-bold text-center text-sm">
                   {errorMessage}
                 </Text>
               </View>

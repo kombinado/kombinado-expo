@@ -1,4 +1,4 @@
-import React from "react";
+import { colors as themeColors } from '@/src/theme/colors';
 import { ActivityIndicator, Text, View } from "react-native";
 
 interface LoadingStateProps {
@@ -9,9 +9,9 @@ interface LoadingStateProps {
 export function LoadingState({ message }: LoadingStateProps) {
   return (
     <View className="py-10 items-center justify-center gap-3">
-      <ActivityIndicator color="#E84855" size="large" />
+      <ActivityIndicator color={themeColors.text.links} size="large" />
       {message ? (
-        <Text className="text-slate-500 font-semibold text-center">
+        <Text className="text-text-light-primary font-semibold text-center">
           {message}
         </Text>
       ) : null}
