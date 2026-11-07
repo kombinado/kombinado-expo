@@ -7,7 +7,7 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      colors: colors, // O Tailwind agora puxa as cores do colors.ts
+      colors: colors, // Tailwind now pulls colors from colors.ts.
     },
   },
   plugins: [],

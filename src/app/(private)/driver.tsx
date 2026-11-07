@@ -14,9 +14,10 @@ import { useCreateRide } from "@/src/hooks/useCreateRide";
 import { useDriverRideRequests } from "@/src/hooks/useDriverRideRequests";
 import { useDriverRides } from "@/src/hooks/useDriverRides";
 import { useProfile } from "@/src/hooks/useProfile";
+import { colors as themeColors } from '@/src/theme/colors';
 import { CarFront, Plus } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, View, RefreshControl } from "react-native";
+import { Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 
 export default function Driver() {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
@@ -85,15 +86,16 @@ export default function Driver() {
   };
 
   return (
-    <View className="flex-1 bg-[#FAF9F9]">
+    <View className="flex-1 bg-background">
       <ScrollView 
         contentContainerStyle={{ padding: 20 }}
         refreshControl={
           <RefreshControl
             refreshing={isRidesLoading}
             onRefresh={() => { void refetchRides(); }}
-            colors={["#E84855"]}
-            tintColor="#E84855"
+            colors={[themeColors.text.links]}
+            tintColor={themeColors.text.links}
+            progressBackgroundColor={themeColors.card}
           />
         }
       >
@@ -130,11 +132,11 @@ export default function Driver() {
 
       <Pressable
         onPress={openCreateModal}
-        className="absolute right-6 bottom-6 w-16 h-16 bg-black rounded-full items-center justify-center shadow-lg shadow-black/40 active:scale-90 active:bg-black/70 transition-all z-10"
+        className="absolute right-6 bottom-6 w-16 h-16 bg-button rounded-full items-center justify-center shadow-lg shadow-black/40 active:scale-90 active:bg-button/70 transition-all z-10"
         accessibilityRole="button"
         accessibilityLabel="Criar nova carona"
       >
-        <Plus size={32} color="#FFF" strokeWidth={2.5} />
+        <Plus size={32} color={themeColors.text.dark} strokeWidth={2.5} />
       </Pressable>
 
       <RequestsModal
