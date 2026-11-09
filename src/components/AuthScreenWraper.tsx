@@ -8,7 +8,7 @@ interface AuthScreenWrapperProps {
 
 export function AuthScreenWrapper({ children }: AuthScreenWrapperProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#E84855]">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
         contentContainerClassName="flex-grow p-6"

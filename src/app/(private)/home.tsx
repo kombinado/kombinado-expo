@@ -15,9 +15,10 @@ import {
 } from "@/src/hooks/apiTypes";
 import { useAvailableRides } from "@/src/hooks/useAvailableRides";
 import { usePassengerRideRequests } from "@/src/hooks/usePassengerRideRequests";
+import { colors as themeColors } from '@/src/theme/colors';
 import { CarFront, SearchX, Ticket } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Linking, Text, View, RefreshControl } from "react-native";
+import { Alert, Linking, RefreshControl, Text, View } from "react-native";
 
 export default function Home() {
   const [isToRequest, setIsToRequest] = useState(true);
@@ -102,13 +103,14 @@ export default function Home() {
         <RefreshControl
           refreshing={isLoadingRides || isLoadingRequests}
           onRefresh={handleRefresh}
-          colors={["#E84855"]}
-          tintColor="#E84855"
+          colors={[themeColors.text.links]}
+          tintColor={themeColors.text.links}
+          progressBackgroundColor={themeColors.card}
         />
       }
     >
       <View className="mb-10">
-        <Text className="text-2xl font-bold">Caronas Disponíveis</Text>
+        <Text className="text-2xl text-text-light-primary font-bold">Caronas Disponíveis</Text>
       </View>
 
       <View className="mb-10">
