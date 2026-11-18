@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, Text, View } from "react-native";
 
 interface ToggleButtonProps {
@@ -15,16 +14,16 @@ export function ToggleButton({
   labelRight = "Motorista",
 }: ToggleButtonProps) {
   return (
-    <View className="flex-row w-full h-12 bg-white border-2 border-[#E84855] rounded-xl overflow-hidden">
+    <View className="flex-row w-full h-12 bg-card border-2 border-card rounded-xl overflow-hidden">
       <Pressable
         onPress={() => onToggle(true)}
-        className={`w-1/2 h-full items-center justify-center border-2 border-white rounded-xl transition-colors ${
-          value ? "bg-[#E84855]" : "bg-white"
+        className={`w-1/2 h-full items-center justify-center rounded-xl transition-colors ${
+          value ? "bg-button" : "bg-transparent"
         }`}
       >
         <Text
           className={`bg-transparent font-semibold text-lg ${
-            value ? "text-white" : "text-[#E84855]"
+            value ? "text-text-dark" : "text-text-light-primary"
           }`}
         >
           {labelLeft}
@@ -33,13 +32,13 @@ export function ToggleButton({
 
       <Pressable
         onPress={() => onToggle(false)}
-        className={`w-1/2 h-full items-center justify-center border-2 border-white rounded-xl transition-colors ${
-          !value ? "bg-[#E84855]" : "bg-white"
+        className={`w-1/2 h-full items-center justify-center rounded-xl transition-colors ${
+          !value ? "bg-button" : "bg-transparent"
         }`}
       >
         <Text
           className={`bg-transparent font-semibold text-lg ${
-            !value ? "text-white" : "text-[#E84855]"
+            !value ? "text-text-dark" : "text-text-light-primary"
           }`}
         >
           {labelRight}

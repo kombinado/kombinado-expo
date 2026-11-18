@@ -1,5 +1,4 @@
 import { Image } from "expo-image";
-import React from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,7 +14,7 @@ export function Header({ firstName }: HeaderProps) {
   return (
     <View
       style={{ paddingTop: insets.top + 16 }}
-      className="bg-[#E84855] px-5 pb-4 flex-row gap-3 items-center"
+      className="bg-card px-5 pb-4 flex-row gap-3 items-center"
     >
       <Image
         source={require("../../assets/images/kombi-auth-vector-image.svg")}
@@ -25,8 +24,8 @@ export function Header({ firstName }: HeaderProps) {
 
       <View>
         {/* 3. Injetamos a variável usando as chaves no JSX */}
-        <Text className="text-red-100 font-bold text-xs">Olá, {firstName}</Text>
-        <Text className="text-white text-xl font-black">
+        <Text className="text-text-light-secondary font-bold text-xs">Olá, {firstName}</Text>
+        <Text className="text-text-light-primary text-xl font-black">
           Bem-vindo de volta!
         </Text>
       </View>

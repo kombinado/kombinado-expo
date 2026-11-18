@@ -1,5 +1,6 @@
 import { Header } from "@/src/components/Header";
 import { useAuth } from "@/src/hooks/useAuth";
+import { colors } from '@/src/theme/colors';
 import { Tabs } from "expo-router";
 import { Car, House, User } from "lucide-react-native";
 import { View } from "react-native";
@@ -16,7 +17,7 @@ export default function AppLayout() {
         header: () => <Header firstName={user?.name?.split(" ")[0] || "Motorista"} />,
 
         tabBarStyle: {
-          backgroundColor: "#E84855",
+          backgroundColor: colors.card,
           borderTopWidth: 0,
 
           height: 60 + insets.bottom,
@@ -25,8 +26,8 @@ export default function AppLayout() {
 
           paddingTop: 10,
         },
-        tabBarActiveTintColor: "#E84855",
-        tabBarInactiveTintColor: "#e5e5e5",
+        tabBarActiveTintColor: colors.text.dark,
+        tabBarInactiveTintColor: colors.text["light-secondary"],
         tabBarLabelStyle: {
           fontWeight: "900",
           fontSize: 12,
@@ -43,7 +44,7 @@ export default function AppLayout() {
             <View
               className={`p-2 rounded-full transition-all ${
                 focused
-                  ? "bg-white" // Efeito quando está clicado
+                  ? "bg-text-links" // Efeito quando está clicado
                   : "" // Sem efeito quando está inativo
               }`}
             >
@@ -62,7 +63,7 @@ export default function AppLayout() {
             <View
               className={`p-2 rounded-full transition-all ${
                 focused
-                  ? "bg-white" // Efeito quando está clicado
+                  ? "bg-text-links" // Efeito quando está clicado
                   : "" // Sem efeito quando está inativo
               }`}
             >
@@ -81,7 +82,7 @@ export default function AppLayout() {
             <View
               className={`p-2 rounded-full transition-all ${
                 focused
-                  ? "bg-white" // Efeito quando está clicado
+                  ? "bg-text-links" // Efeito quando está clicado
                   : "" // Sem efeito quando está inativo
               }`}
             >

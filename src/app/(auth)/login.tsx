@@ -1,18 +1,19 @@
 import { AuthScreenWrapper } from "@/src/components/AuthScreenWraper";
 import { useAuth } from "@/src/hooks/useAuth";
+import { colors } from '@/src/theme/colors';
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   Text,
   TextInput,
-  View,
-  Alert,
-  Platform
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -51,7 +52,7 @@ export default function Login() {
 
   return (
     <AuthScreenWrapper>
-      <SafeAreaView className="flex-1 bg-[#E84855]">
+      <SafeAreaView className="flex-1 bg-background">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="justify-center px-8 gap-y-12"
@@ -65,20 +66,20 @@ export default function Login() {
           </View>
 
           {/* Formulário Acessível */}
-          <View className="bg-[#FAF9F9] flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8 shadow-lg">
+          <View className="bg-card flex-col rounded-[12px] py-[40px] px-[20px] gap-y-8 shadow-lg">
             <View className="gap-4">
-              <Text className="text-3xl text-wrap font-bold text-[#040F0F]">
+              <Text className="text-3xl text-wrap font-bold text-text-light-primary">
                 Bem-vindo à comunidade
               </Text>
-              <Text className="text-lg text-wrap text-[#040F0F]">
+              <Text className="text-lg text-wrap text-text-light-primary">
                 Acesse sua conta institucional para encontrar caronas e colegas.
               </Text>
             </View>
 
             {/* Banner de Sucesso (Se vindo de Cadastro) */}
             {successSignup === "true" && (
-              <View className="bg-emerald-100 border border-emerald-400 p-4 rounded-xl">
-                <Text className="text-emerald-800 font-bold text-center text-sm">
+              <View className="bg-success-primary border border-success-secondary p-4 rounded-xl">
+                <Text className="text-success-secondary font-bold text-center text-sm">
                   Conta cadastrada com sucesso! Faça seu login abaixo.
                 </Text>
               </View>
@@ -86,8 +87,8 @@ export default function Login() {
 
             {/* Banner de Erro */}
             {errorMessage ? (
-              <View className="bg-rose-100 border border-rose-400 p-4 rounded-xl">
-                <Text className="text-rose-800 font-bold text-center text-sm">
+              <View className="bg-error-primary border border-error-secondary p-4 rounded-xl">
+                <Text className="text-error-secondary font-bold text-center text-sm">
                   {errorMessage}
                 </Text>
               </View>
@@ -95,11 +96,10 @@ export default function Login() {
 
             <View className="flex-col gap-y-5">
               <TextInput
-                className="w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg"
+                className="w-full bg-input font-semibold text-text-light-primary placeholder:text-text-light-secondary px-4 py-4 rounded-2xl border-2 border-transparent focus:border-text-links focus:bg-input text-lg"
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
-                placeholderTextColor="#A1A1AA"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!isSubmitting}
@@ -110,11 +110,10 @@ export default function Login() {
 
               <View className="relative w-full justify-center">
                 <TextInput
-                  className="w-full bg-[#F0F0F0] font-semibold text-[#040F0F] px-4 py-4 rounded-2xl border-2 border-transparent focus:border-[#E84855] focus:bg-white text-lg pr-12"
+                  className="w-full bg-input font-semibold text-text-light-primary placeholder:text-text-light-secondary px-4 py-4 rounded-2xl border-2 border-transparent focus:border-text-links focus:bg-input text-lg pr-12"
                   placeholder="Senha"
                   value={password}
                   onChangeText={setPassword}
-                  placeholderTextColor="#A1A1AA"
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   editable={!isSubmitting}
@@ -128,9 +127,9 @@ export default function Login() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showPassword ? (
-                    <EyeOff size={24} color="#A1A1AA" />
+                    <EyeOff size={24} color={colors.text['light-secondary']} />
                   ) : (
-                    <Eye size={24} color="#A1A1AA" />
+                    <Eye size={24} color={colors.text['light-secondary']} />
                   )}
                 </Pressable>
               </View>
@@ -138,7 +137,7 @@ export default function Login() {
 
             {/* Botão Principal */}
             <Pressable
-              className={`mt-4 w-full bg-[#040F0F] py-5 rounded-2xl items-center shadow-md active:bg-[#040F0F]/70 active:scale-95 ${
+              className={`mt-4 w-full bg-button py-5 rounded-2xl items-center shadow-md active:bg-button/70 active:scale-95 ${
                 isSubmitting ? "opacity-60" : ""
               }`}
               onPress={handleLogin}
@@ -149,9 +148,9 @@ export default function Login() {
               accessibilityHint="Toque para fazer login e buscar caronas"
             >
               {isSubmitting ? (
-                <ActivityIndicator color="#FAF9F9" />
+                <ActivityIndicator color={colors.text['light-primary']} />
               ) : (
-                <Text className="text-white text-xl font-extrabold tracking-widest">
+                <Text className="text-text-dark text-xl font-extrabold tracking-widest">
                   Entrar
                 </Text>
               )}
@@ -159,14 +158,14 @@ export default function Login() {
           </View>
 
           <View className="flex-row self-center">
-            <Text className="mr-1 text-[#FAF9F9]">
+            <Text className="mr-1 text-text-light-secondary">
               Ainda não possui uma conta?
             </Text>
             <Pressable
               onPress={() => router.push("/signup")}
               disabled={isSubmitting}
             >
-              <Text className="text-[#FAF9F9] font-bold">Criar Conta</Text>
+              <Text className="text-text-links font-bold">Criar Conta</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>

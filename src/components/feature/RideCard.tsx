@@ -1,3 +1,4 @@
+import { colors as themeColors } from '@/src/theme/colors';
 import {
   ArrowDownFromLine,
   Calendar,
@@ -57,11 +58,11 @@ export function RideCard({
   const vehicleInfo = [carModel, carColor, carPlate].filter(Boolean);
 
   return (
-    <View className="flex bg-[#E84855] rounded-xl px-4 py-6 gap-6 shadow-sm mb-4">
+    <View className="flex bg-card rounded-xl px-4 py-6 gap-6 shadow-sm mb-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-col flex-1 mr-4">
           <Text
-            className="text-2xl font-semibold text-white mb-1"
+            className="text-2xl font-semibold text-text-light-primary mb-1"
             numberOfLines={1}
           >
             {driverName}
@@ -72,10 +73,10 @@ export function RideCard({
               {vehicleInfo.map((info, index) => (
                 <React.Fragment key={`${info}-${index}`}>
                   {index > 0 ? (
-                    <View className="w-1 h-1 bg-red-200/50 rounded-full" />
+                    <View className="w-1 h-1 bg-text-light-secondary rounded-full" />
                   ) : null}
                   <Text
-                    className={`text-sm text-red-100 ${
+                    className={`text-sm text-text-light-primary ${
                       info === carPlate
                         ? "font-bold uppercase tracking-wider"
                         : "font-medium"
@@ -89,44 +90,44 @@ export function RideCard({
           ) : null}
         </View>
 
-        <View className="bg-white px-4 py-3 rounded-xl items-center justify-center shadow-sm">
-          <Text className="text-[#040F0F] text-lg font-black">
+        <View className="bg-text-light-primary px-4 py-3 rounded-xl items-center justify-center shadow-sm">
+          <Text className="text-text-dark text-lg font-black">
             {availableSpots} {availableSpots === 1 ? "vaga" : "vagas"}
           </Text>
         </View>
       </View>
 
-      <View className="flex-row gap-6 bg-white/10 p-3 rounded-xl">
+      <View className="flex-row gap-6 bg-input p-3 rounded-xl">
         <View className="flex-row items-center flex-1 justify-center">
-          <Calendar size={20} color="#FFF" strokeWidth={2.5} />
-          <Text className="ml-2 text-lg text-white font-bold">{date}</Text>
+          <Calendar size={20} color={themeColors.text['light-primary']} strokeWidth={2.5} />
+          <Text className="ml-2 text-lg text-text-light-primary font-bold">{date}</Text>
         </View>
 
-        <View className="w-[2px] bg-white/20 rounded-full" />
+        <View className="w-[2px] bg-text-light-secondary rounded-full" />
 
         <View className="flex-row items-center flex-1 justify-center">
-          <Clock size={20} color="#FFF" strokeWidth={2.5} />
-          <Text className="ml-2 text-lg text-white font-bold">{time}</Text>
+          <Clock size={20} color={themeColors.text['light-primary']} strokeWidth={2.5} />
+          <Text className="ml-2 text-lg text-text-light-primary font-bold">{time}</Text>
         </View>
       </View>
 
       <View className="flex-col gap-3 pl-2">
         <View className="flex-row gap-3 items-start">
           <View className="items-center mt-1">
-            <MapPin size={22} color="#FFF" strokeWidth={2.5} />
+            <MapPin size={22} color={themeColors.text['light-primary']} strokeWidth={2.5} />
           </View>
           <View className="flex-col flex-1">
-            <Text className="text-red-100 text-xs font-bold uppercase tracking-widest mb-0.5">
+            <Text className="text-text-links text-xs font-bold uppercase tracking-widest mb-0.5">
               Origem
             </Text>
-            <Text className="text-white text-xl font-bold leading-tight">
+            <Text className="text-text-light-primary text-xl font-bold leading-tight">
               {origin}
             </Text>
           </View>
         </View>
 
         <View className="pl-[2px]">
-          <ArrowDownFromLine size={18} color="#FFB5B5" strokeWidth={2.5} />
+          <ArrowDownFromLine size={18} color={themeColors.text['light-secondary']} strokeWidth={2.5} />
         </View>
 
         <View className="flex-row gap-3 items-start">
@@ -136,20 +137,20 @@ export function RideCard({
             accessibilityRole="button"
             accessibilityLabel={`Open destination in Google Maps: ${destination}`}
             accessibilityHint="Opens the destination in Google Maps or your browser"
-            className="items-center justify-center mt-1 w-11 h-11 rounded-full bg-white shadow-sm active:opacity-80"
+            className="items-center justify-center mt-1 w-11 h-11 rounded-full bg-text-links shadow-sm active:opacity-80"
           >
            <LocateFixed
               size={22}
-              color="#E84855"
+              color={themeColors.text.dark}
               strokeWidth={2.5}
             />
           </Pressable>
           
           <View className="flex-col flex-1">
-            <Text className="text-red-100 text-xs font-bold uppercase tracking-widest mb-0.5">
+            <Text className="text-text-links text-xs font-bold uppercase tracking-widest mb-0.5">
               Destino
             </Text>
-            <Text className="text-white text-xl font-bold leading-tight">
+            <Text className="text-text-light-primary text-xl font-bold leading-tight">
               {destination}
             </Text>
           </View>
@@ -159,7 +160,7 @@ export function RideCard({
       <View className="mt-2">
         <Pressable
           onPress={onRequestRide}
-          className={`w-full bg-[#040F0F] py-4 rounded-xl items-center shadow-lg active:bg-[#040F0F]/80 active:scale-95 transition-all ${
+          className={`w-full bg-button py-4 rounded-xl items-center shadow-lg active:bg-button/70 active:scale-95 transition-all ${
             isRequesting ? "opacity-70" : ""
           }`}
           disabled={isRequesting}
@@ -169,9 +170,9 @@ export function RideCard({
           accessibilityHint="Toque para enviar uma solicitação de carona para este motorista"
         >
           {isRequesting ? (
-            <ActivityIndicator color="#FFF" />
+            <ActivityIndicator color={themeColors.text['light-primary']} />
           ) : (
-            <Text className="text-white text-xl font-black uppercase tracking-wider">
+            <Text className="text-text-dark text-xl font-black uppercase tracking-wider">
               Solicitar Carona
             </Text>
           )}

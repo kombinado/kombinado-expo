@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, View } from "react-native";
 
 interface ErrorBannerProps {
@@ -12,9 +11,9 @@ export function ErrorBanner({ message, className = "" }: ErrorBannerProps) {
 
   return (
     <View
-      className={`bg-rose-100 border border-rose-300 p-3 rounded-xl ${className}`}
+      className={`bg-error-primary border border-error-secondary p-3 rounded-xl ${className}`}
     >
-      <Text className="text-rose-700 text-sm font-bold text-center">
+      <Text className="text-error-secondary text-sm font-bold text-center">
         {message}
       </Text>
     </View>

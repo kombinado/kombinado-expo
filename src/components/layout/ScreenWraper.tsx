@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, RefreshControlProps } from "react-native";
+import { RefreshControlProps, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenWrapperProps {
@@ -9,7 +9,7 @@ interface ScreenWrapperProps {
 
 export function ScreenWrapper({ children, refreshControl }: ScreenWrapperProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#FFF]">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
         contentContainerClassName="flex-grow p-6"

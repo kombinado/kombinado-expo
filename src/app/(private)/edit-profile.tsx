@@ -6,6 +6,7 @@ import { ensureApiSuccess, getErrorMessage } from "@/src/hooks/apiHookUtils";
 import type { UserProfileResponseDto } from "@/src/hooks/apiTypes";
 import { useAuth } from "@/src/hooks/useAuth";
 import { type AppProfile, useProfile } from "@/src/hooks/useProfile";
+import { colors as themeColors } from '@/src/theme/colors';
 import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
@@ -53,7 +54,7 @@ export default function EditProfile() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-[#FAF9F9]"
+      className="flex-1 bg-background"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -69,17 +70,17 @@ export default function EditProfile() {
           onPress={() => router.navigate("/profile")}
           className="mt-4 mb-6 flex-row items-center self-start py-2"
         >
-          <ArrowLeft size={22} color="#E84855" />
-          <Text className="ml-2 font-semibold text-[#E84855]">
+          <ArrowLeft size={22} color={themeColors.text.links} />
+          <Text className="ml-2 font-semibold text-text-links">
             Voltar ao perfil
           </Text>
         </Pressable>
 
-        <Text className="mb-2 text-2xl font-bold text-[#040F0F]">
+        <Text className="mb-2 text-2xl font-bold text-text-light-primary">
           Editar perfil
         </Text>
 
-        <Text className="mb-6 text-base text-gray-600">
+        <Text className="mb-6 text-base text-text-light-secondary">
           Atualize suas informações pessoais e, se você for motorista, os dados
           do seu veículo.
         </Text>
@@ -224,70 +225,70 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
 
   return (
     <>
-      <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-        <Text className="mb-4 text-lg font-bold text-[#040F0F]">
+      <View className="mb-5 rounded-2xl border border-text-light-secondary bg-card p-4 shadow-sm">
+        <Text className="mb-4 text-lg font-bold text-text-light-primary">
           Informações pessoais
         </Text>
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">Nome completo</Text>
+        <Text className="mb-2 font-semibold text-text-links">Nome completo</Text>
         <TextInput
           value={name}
           onChangeText={setName}
           placeholder="Digite seu nome completo"
           maxLength={100}
           autoCapitalize="words"
-          className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-          placeholderTextColor="#888888"
+          className="mb-4 rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+          placeholderTextColor={themeColors.text["light-secondary"]}
         />
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">WhatsApp</Text>
+        <Text className="mb-2 font-semibold text-text-links">WhatsApp</Text>
         <TextInput
           value={whatsApp}
           onChangeText={setWhatsApp}
           placeholder="DDD + número"
           keyboardType="phone-pad"
-          className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-          placeholderTextColor="#888888"
+          className="mb-4 rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+          placeholderTextColor={themeColors.text["light-secondary"]}
         />
 
-        <Text className="mb-2 font-semibold text-[#040F0F]">Curso</Text>
+        <Text className="mb-2 font-semibold text-text-links">Curso</Text>
         <TextInput
           value={course}
           onChangeText={setCourse}
           placeholder="Digite seu curso"
           maxLength={100}
-          className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-          placeholderTextColor="#888888"
+          className="rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+          placeholderTextColor={themeColors.text["light-secondary"]}
         />
       </View>
 
       {profile.isDriver && (
-        <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <Text className="mb-4 text-lg font-bold text-[#040F0F]">
+        <View className="mb-5 rounded-2xl border border-text-light-secondary bg-card p-4 shadow-sm">
+          <Text className="mb-4 text-lg font-bold text-text-light-primary">
             Dados do veículo
           </Text>
 
-          <Text className="mb-2 font-semibold text-[#040F0F]">Modelo</Text>
+          <Text className="mb-2 font-semibold text-text-links">Modelo</Text>
           <TextInput
             value={vehicleModel}
             onChangeText={setVehicleModel}
             placeholder="Ex.: Honda Civic"
             maxLength={50}
-            className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+            className="mb-4 rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+            placeholderTextColor={themeColors.text["light-secondary"]}
           />
 
-          <Text className="mb-2 font-semibold text-[#040F0F]">Cor</Text>
+          <Text className="mb-2 font-semibold text-text-links">Cor</Text>
           <TextInput
             value={vehicleColor}
             onChangeText={setVehicleColor}
             placeholder="Ex.: Prata"
             maxLength={30}
-            className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+            className="mb-4 rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+            placeholderTextColor={themeColors.text["light-secondary"]}
           />
 
-          <Text className="mb-2 font-semibold text-[#040F0F]">Placa</Text>
+          <Text className="mb-2 font-semibold text-text-links">Placa</Text>
           <TextInput
             value={vehiclePlate}
             onChangeText={(value) => setVehiclePlate(value.toUpperCase())}
@@ -295,11 +296,11 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
             // Allows a hyphen (ABC-1234), removed before sending
             maxLength={8}
             autoCapitalize="characters"
-            className="mb-4 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+            className="mb-4 rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+            placeholderTextColor={themeColors.text["light-secondary"]}
           />
 
-          <Text className="mb-2 font-semibold text-[#040F0F]">
+          <Text className="mb-2 font-semibold text-text-links">
             Quantidade de lugares
           </Text>
           <TextInput
@@ -308,8 +309,8 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
             placeholder="De 1 a 8"
             keyboardType="number-pad"
             maxLength={1}
-            className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-[#040F0F]"
-            placeholderTextColor="#888888"
+            className="rounded-xl border border-text-light-secondary bg-input px-4 py-3 text-base text-text-light-primary"
+            placeholderTextColor={themeColors.text["light-secondary"]}
           />
         </View>
       )}
@@ -320,10 +321,10 @@ function EditProfileForm({ profile }: { profile: AppProfile }) {
         onPress={handleSave}
         disabled={isSaving}
         className={`mt-2 items-center justify-center rounded-xl p-4 ${
-          isSaving ? "bg-gray-400" : "bg-[#E84855]"
+          isSaving ? "bg-button/70" : "bg-button"
         }`}
       >
-        <Text className="font-bold text-white">
+        <Text className="font-bold text-dark">
           {isSaving ? "Salvando..." : "Salvar alterações"}
         </Text>
       </Pressable>
